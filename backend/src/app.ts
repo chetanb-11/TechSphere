@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from 'express';
 import axios from 'axios';
 import cors from 'cors';
 
+import productsRoutes from './modules/products/products.routes';
+
 const app: Express = express();
 
 // Middleware
@@ -9,10 +11,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Routes
+app.use('/api/products', productsRoutes);
+
 // Basic route
 app.get('/', (req: Request, res: Response) => {
     res.send('Ecommerce API is running!');
 });
+
 app.get('/api/data', async (req: Request, res: Response) => {
     try {
         const response = await axios.get('https://fakestoreapi.com/products');
