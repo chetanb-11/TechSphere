@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getProductbyCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick } from './products.controller';
+import { getProductByCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick } from './products.controller';
 
 const router = Router();
 
@@ -11,6 +11,6 @@ router.get('/trending/week', getWeekTrendingProducts);
 router.get('/id/:id', getProductsById);
 router.patch('/id/:id/click', incrementProductClick);
 router.get('/brands/:brand', getProductsByBrand);
-router.get('/:category', getProductbyCategory);
+router.get('/:category', getProductByCategory);
 
 export default router;

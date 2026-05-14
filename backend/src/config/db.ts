@@ -1,7 +1,7 @@
 import { MongoClient, Db } from 'mongodb';
 
-const url = 'mongodb://localhost:27017';
-const client = new MongoClient(url);
+const url = process.env.MONGO_URL;
+const client = new MongoClient(url as string);
 const dbName = 'eCom';
 
 let db: Db;

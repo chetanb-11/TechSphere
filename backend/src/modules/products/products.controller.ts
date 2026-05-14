@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { ProductsService } from "./products.service";
-import { ObjectId } from 'mongodb';
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -11,7 +10,7 @@ export const getProducts = async (req: Request, res: Response) => {
     }
 };
 
-export const getProductbyCategory = async (req: Request, res: Response) => {
+export const getProductByCategory = async (req: Request, res: Response) => {
     try {
         const { category } = req.params;
         const productsByCategory = await ProductsService.getAllProductsByCategory(category as string);
@@ -24,7 +23,7 @@ export const getProductbyCategory = async (req: Request, res: Response) => {
 export const getProductsByBrand = async (req: Request, res: Response) => {
     try {
         const { brand } = req.params;
-        const productsByBrand = await ProductsService.getAllProductsBybrand(brand as string);
+        const productsByBrand = await ProductsService.getAllProductsByBrand(brand as string);
         res.status(200).json(productsByBrand);
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error });

@@ -1,64 +1,36 @@
-import { product } from './products.model';
+import { Product } from './products.model';
 import { getDb } from '../../config/db';
 import { ObjectId } from 'mongodb';
 
 export class ProductsService {
-    static async getAllProducts(): Promise<product[]> {
+    static async getAllProducts(): Promise<Product[]> {
         const db = getDb();
-        const products = await db.collection<product>('products').find({}).toArray();
-        if (products) {
-            return products;
-        } else {
-            return [];
-        }
+        return await db.collection<Product>('products').find({}).toArray();
     }
 
-    static async getAllProductsByCategory(category: string): Promise<product[]> {
+    static async getAllProductsByCategory(category: string): Promise<Product[]> {
         const db = getDb();
-        const productsByCategory = await db.collection<product>('products').find({ category }).toArray();
-        if (productsByCategory) {
-            return productsByCategory;
-        } else {
-            return [];
-        }
+        return await db.collection<Product>('products').find({ category }).toArray();
     }
 
-    static async getAllTodayTrendingProducts(): Promise<product[]> {
+    static async getAllTodayTrendingProducts(): Promise<Product[]> {
         const db = getDb();
-        const TodayTrendingProducts = await db.collection<product>('products').find({}).sort({ clickedToday: -1 }).toArray();
-        if (TodayTrendingProducts) {
-
-            return TodayTrendingProducts;
-        } else {
-            return [];
-        }
+        return await db.collection<Product>('products').find({}).sort({ clickedToday: -1 }).toArray();
     }
 
-    static async getAllWeekTrendingProducts(): Promise<product[]> {
+    static async getAllWeekTrendingProducts(): Promise<Product[]> {
         const db = getDb();
-        const TodayTrendingProducts = await db.collection<product>('products').find({}).sort({ clickedWeek: -1 }).toArray();
-        if (TodayTrendingProducts) {
-
-            return TodayTrendingProducts;
-        } else {
-            return [];
-        }
+        return await db.collection<Product>('products').find({}).sort({ clickedWeek: -1 }).toArray();
     }
 
-    static async getAllProductsBybrand(brand: string): Promise<product[]> {
+    static async getAllProductsByBrand(brand: string): Promise<Product[]> {
         const db = getDb();
-        const TodayTrendingProducts = await db.collection<product>('products').find({ brand }).toArray();
-        if (TodayTrendingProducts) {
-            return TodayTrendingProducts;
-        } else {
-            return [];
-        }
+        return await db.collection<Product>('products').find({ brand }).toArray();
     }
 
-    static async getProductsById(id: string): Promise<product | null> {
+    static async getProductsById(id: string): Promise<Product | null> {
         const db = getDb();
-        const product = await db.collection<product>('products').findOne({ _id: new ObjectId(id) });
-        return product;
+        return await db.collection<Product>('products').findOne({ _id: new ObjectId(id) });
     }
 
     static async incrementProductClick(id: string) {
