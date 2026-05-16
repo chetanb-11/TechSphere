@@ -1,0 +1,6 @@
+{
+  "name": "Dashboard Application",
+  "description": "A modern dashboard application built with Vite, React Router, and Tailwind CSS.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
