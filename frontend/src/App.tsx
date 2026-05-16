@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import Navbar from "./layouts/navbar";
+import { Navbar } from "./layouts/navbar";
 import Dashboard from "./Dashboard";
 
 function App() {
 
   return (
-    <Dashboard/>
+    <>
+      <Navbar />
+      {/* <Dashboard /> */}
+    </>
   )
 }
 export default App;
