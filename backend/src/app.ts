@@ -8,7 +8,7 @@ import { connectToDatabase } from './config/db';
 const app: Express = express();
 
 const corsOptions: cors.CorsOptions = {
-    origin: [process.env.FRONTEND_DOMAIN || '', 'http://localhost:5173', 'http://localhost:3000']
+    origin: [process.env.FRONTEND_DOMAIN || '', 'http://tech-sphere-dashboard.vercel.app', 'http://localhost:3000']
 };
 
 // Middleware
