@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { getProductByCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick } from './products.controller';
 
 const router = Router();

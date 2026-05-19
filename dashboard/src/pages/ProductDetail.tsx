@@ -28,7 +28,7 @@ export function ProductDetail() {
           <div className="flex flex-col">
              <div className="mb-2 text-blue-600 font-bold uppercase tracking-wider text-xs">{product.brand}</div>
              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 mb-4">{product.name}</h1>
-             <div className="text-3xl font-bold text-slate-900 mb-6">${product.price}</div>
+             <div className="text-3xl font-bold text-slate-900 mb-6">₹{product.price}</div>
              
              <p className="text-lg text-slate-600 leading-relaxed mb-8">
                {product.description}

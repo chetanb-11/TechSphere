@@ -57,7 +57,7 @@ export function Inventory() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalValue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">₹{totalValue.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
@@ -89,7 +89,7 @@ export function Inventory() {
                       </div>
                     </td>
                     <td className="p-6 align-middle text-slate-500">{product.category}</td>
-                    <td className="p-6 align-middle font-medium">${product.price}</td>
+                    <td className="p-6 align-middle font-medium">₹{product.price}</td>
                     <td className="p-6 align-middle">
                       <span className="font-medium">{product.stock}</span> units
                     </td>

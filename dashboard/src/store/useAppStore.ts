@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { apiService } from "../services/api";
 
 export interface Product {
   id: string;
@@ -9,6 +10,8 @@ export interface Product {
   stock: number;
   description: string;
   brand: string;
+  clickedToday: number;
+  clickedWeek: number;
 }
 
 export interface CartItem extends Product {
@@ -18,33 +21,99 @@ export interface CartItem extends Product {
 interface AppState {
   products: Product[];
   cartItems: CartItem[];
+  isLoading: boolean;
+  error: string | null;
+  fetchProducts: () => Promise<void>;
+  fetchCartItems: () => Promise<void>;
+  searchResults: Product[];
+  isSearching: boolean;
+  searchError: string | null;
+  searchProducts: (query: string) => Promise<void>;
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
 }
 
-const mockProducts: Product[] = [
-  { id: "1", name: "VoltCore Pro X1", price: 2499, category: "Laptops", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80", stock: 45, description: "Titanium chassis with Neural 9 Processor and 8K OLED Retina display. Engineered for extreme performance.", brand: "VoltSeries" },
-  { id: "2", name: "AeroPhone 15 Ultra", price: 1199, category: "Mobile", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80", stock: 120, description: "Titanium Silver, 256GB, Ultra-wide Camera with computational photography.", brand: "VoltSeries" },
-  { id: "3", name: "Sonic Pure ANC", price: 349, category: "Audio", image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=800&q=80", stock: 12, description: "Studio-grade active noise cancellation with lossless audio reproduction.", brand: "QuantumTech" },
-  { id: "4", name: "Nexus Air Pad", price: 1099, category: "Tablets", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=800&q=80", stock: 0, description: "The thinnest tablet ever engineered with Haptic Touch and M-series silicon.", brand: "VoltSeries" },
-  { id: "5", name: "VoltWatch Gen 5", price: 399, category: "Wearables", image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80", stock: 89, description: "Precision health monitoring with sapphire crystal and 40-hour battery life.", brand: "VoltSeries" },
-  { id: "6", name: "VisionCurve 38\"", price: 1299, category: "Displays", image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80", stock: 5, description: "38-inch ultrawide 4K curved display with 144Hz refresh rate, DCI-P3 color.", brand: "QuantumTech" },
-];
-
-export const useAppStore = create<AppState>((set) => ({
-  products: mockProducts,
+export const useAppStore = create<AppState>((set, get) => ({
+  products: [],
   cartItems: [],
-  addToCart: (product, quantity = 1) => set((state) => {
-    const existing = state.cartItems.find(item => item.id === product.id);
-    if (existing) {
-      return { cartItems: state.cartItems.map(item => item.id === product.id ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) } : item) };
+  searchResults: [],
+  isLoading: false,
+  isSearching: false,
+  error: null,
+  searchError: null,
+  fetchProducts: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const products = await apiService.getProducts();
+      set({ products, isLoading: false });
+    } catch (err: any) {
+      set({ error: err.message || "Failed to fetch products", isLoading: false });
     }
-    return { cartItems: [...state.cartItems, { ...product, quantity: Math.min(product.stock, quantity) }] };
-  }),
-  removeFromCart: (productId) => set((state) => ({
-    cartItems: state.cartItems.filter(item => item.id !== productId)
-  })),
+  },
+
+  addToCart: async (product, quantity = 1) => {
+    try {
+      await apiService.addToCart(product.id);
+      set((state) => {
+        const existing = state.cartItems.find(item => item.id === product.id);
+        if (existing) {
+          return { cartItems: state.cartItems.map(item => item.id === product.id ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) } : item) };
+        }
+        return { cartItems: [...state.cartItems, { ...product, quantity: Math.min(product.stock, quantity) }] };
+      });
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+    }
+  },
+  searchProducts: async (query: string) => {
+    if (!query.trim()) {
+      set({ searchResults: [], isSearching: false, searchError: null });
+      return;
+    }
+    set({ isSearching: true, searchError: null });
+    try {
+      const searchResults = await apiService.searchProducts(query);
+      set({ searchResults, isSearching: false });
+    } catch (err: any) {
+      // Fallback: If API search fails (e.g. 404 because backend route doesn't exist), filter local products
+      let { products } = get();
+      
+      // If products haven't been loaded yet (e.g. direct load of search page), fetch them first
+      if (products.length === 0) {
+        await get().fetchProducts();
+        products = get().products;
+      }
+      
+      const lowerQuery = query.toLowerCase();
+      const localResults = products.filter(p => 
+        (p.name || "").toLowerCase().includes(lowerQuery) ||
+        (p.description || "").toLowerCase().includes(lowerQuery) ||
+        (p.brand || "").toLowerCase().includes(lowerQuery) ||
+        (p.category || "").toLowerCase().includes(lowerQuery)
+      );
+      set({ searchResults: localResults, isSearching: false });
+    }
+  },
+  fetchCartItems: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const cartItems = await apiService.getCartItems();
+      set({ cartItems, isLoading: false });
+    } catch (err) {
+      set({ error: err.message || "Failed to fetch cart items", isLoading: false });
+    }
+  },
+  removeFromCart: async (productId) => {
+    try {
+      await apiService.removeFromCart(productId);
+      set((state) => ({
+        cartItems: state.cartItems.filter(item => item.id !== productId)
+      }));
+    } catch (err: any) {
+      set({ error: err.message || "Failed to remove item from cart" });
+    }
+  },
   updateQuantity: (productId, quantity) => set((state) => ({
     cartItems: state.cartItems.map(item => item.id === productId ? { ...item, quantity } : item)
   }))

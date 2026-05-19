@@ -1,10 +1,15 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
 import { Button } from "../components/ui/Button";
 import { Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 
 export function Cart() {
-  const { cartItems, updateQuantity, removeFromCart } = useAppStore();
+  const { cartItems, updateQuantity, removeFromCart, fetchCartItems } = useAppStore();
+
+  useEffect(() => {
+    fetchCartItems();
+  }, [fetchCartItems]);
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const shipping = subtotal > 0 ? 15 : 0;
@@ -39,7 +44,7 @@ export function Cart() {
                          <div className="text-xs font-semibold text-blue-600 mb-1">{item.brand}</div>
                          <h3 className="font-bold text-slate-900 leading-snug"><Link to={`/product/${item.id}`} className="hover:text-blue-600">{item.name}</Link></h3>
                        </div>
-                       <div className="font-bold text-lg">${item.price}</div>
+                       <div className="font-bold text-lg">₹{item.price}</div>
                      </div>
                      <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-full p-1">
@@ -76,25 +81,25 @@ export function Cart() {
              <div className="space-y-4 text-sm mb-6 border-b border-slate-200 pb-6">
                <div className="flex justify-between text-slate-600">
                  <span>Subtotal</span>
-                 <span className="font-medium text-slate-900">${subtotal.toFixed(2)}</span>
+                 <span className="font-medium text-slate-900">₹{subtotal.toFixed(2)}</span>
                </div>
                <div className="flex justify-between text-slate-600">
                  <span>Shipping</span>
-                 <span className="font-medium text-slate-900">${shipping.toFixed(2)}</span>
+                 <span className="font-medium text-slate-900">₹{shipping.toFixed(2)}</span>
                </div>
                <div className="flex justify-between text-slate-600">
                  <span>Tax (Estimated)</span>
-                 <span className="font-medium text-slate-900">${tax.toFixed(2)}</span>
+                 <span className="font-medium text-slate-900">₹{tax.toFixed(2)}</span>
                </div>
              </div>
              <div className="flex justify-between items-center mb-8">
                <span className="font-bold text-lg">Total</span>
-               <span className="font-bold text-2xl">${total.toFixed(2)}</span>
+               <span className="font-bold text-2xl">₹{total.toFixed(2)}</span>
              </div>
              <Button size="lg" className="w-full rounded-full gap-2">
                 Proceed to Checkout <ArrowRight className="w-4 h-4" />
              </Button>
-             <p className="text-xs text-center text-slate-500 mt-4">Secure checkout powered by VoltGadgets</p>
+             <p className="text-xs text-center text-slate-500 mt-4">Secure checkout powered by TechSphere</p>
           </div>
         </aside>
       </div>

@@ -1,10 +1,45 @@
-import { Outlet, Link } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Search, Package } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
 
 export function StoreLayout() {
   const cartItems = useAppStore(state => state.cartItems) || [];
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const { searchResults, isSearching, searchProducts } = useAppStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim().length > 0) {
+        searchProducts(searchQuery);
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchProducts]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      setShowDropdown(false);
+      navigate(`/catalog?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans">
@@ -15,7 +50,7 @@ export function StoreLayout() {
               <Package className="w-5 h-5" />
             </div>
             <span className="font-bold text-xl tracking-tight text-slate-900">
-              VoltGadgets
+              TechSphere
             </span>
           </Link>
           
@@ -27,9 +62,59 @@ export function StoreLayout() {
           </nav>
           
           <div className="flex items-center gap-5">
-             <div className="relative hidden md:block">
+             <div className="relative hidden md:block" ref={searchRef}>
                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-               <input type="text" placeholder="Search technology..." className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none w-56" />
+               <input 
+                 type="text" 
+                 placeholder="Search technology..." 
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 onKeyDown={handleKeyDown}
+                 onFocus={() => { if (searchQuery.trim().length > 0) setShowDropdown(true); }}
+                 className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none w-56 lg:w-72" 
+               />
+               
+               {showDropdown && (
+                 <div className="absolute top-full mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50">
+                   {isSearching ? (
+                     <div className="p-4 text-center text-sm text-slate-500">Searching...</div>
+                   ) : searchResults.length > 0 ? (
+                     <ul className="max-h-96 overflow-y-auto">
+                       {searchResults.slice(0, 4).map((product) => (
+                         <li key={product.id}>
+                           <Link 
+                             to={`/product/${product.id}`}
+                             onClick={() => {
+                               setShowDropdown(false);
+                               setSearchQuery("");
+                             }}
+                             className="flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                           >
+                             <img src={product.image} alt={product.name} className="w-10 h-10 object-cover rounded bg-slate-100" />
+                             <div className="flex-1 min-w-0">
+                               <p className="text-sm font-semibold text-slate-900 truncate">{product.name}</p>
+                               <p className="text-xs text-slate-500 font-medium">₹{product.price}</p>
+                             </div>
+                           </Link>
+                         </li>
+                       ))}
+                       {searchResults.length > 4 && (
+                         <li className="p-2 border-t border-slate-100">
+                           <Link
+                             to={`/catalog?q=${encodeURIComponent(searchQuery.trim())}`}
+                             onClick={() => setShowDropdown(false)}
+                             className="block w-full text-center text-xs font-semibold text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                           >
+                             View all {searchResults.length} results
+                           </Link>
+                         </li>
+                       )}
+                     </ul>
+                   ) : (
+                     <div className="p-4 text-center text-sm text-slate-500">No results found</div>
+                   )}
+                 </div>
+               )}
              </div>
              <Link to="/cart" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition-colors">
                <ShoppingCart className="w-5 h-5" />

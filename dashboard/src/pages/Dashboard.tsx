@@ -21,7 +21,7 @@ export function Dashboard() {
             <DollarSign className="h-4 w-4 text-slate-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="text-2xl font-bold">₹45,231.89</div>
             <p className="text-xs text-green-500 font-medium mt-1">+20.1% from last month</p>
           </CardContent>
         </Card>
@@ -73,7 +73,7 @@ export function Dashboard() {
                         <div className="font-medium text-sm text-slate-900">Order #VOLT-{(8942 - i).toString()}</div>
                         <div className="text-xs text-slate-500">Processing • Credit Card</div>
                       </div>
-                      <div className="font-bold text-sm">${(Math.random() * 500 + 100).toFixed(2)}</div>
+                      <div className="font-bold text-sm">₹{(Math.random() * 500 + 100).toFixed(2)}</div>
                     </div>
                   ))}
                 </div>
