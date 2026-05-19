@@ -1,12 +1,18 @@
 import { MongoClient, Db } from 'mongodb';
 
-const url = process.env.MONGO_URL;
-const client = new MongoClient(url as string);
 const dbName = 'eCom';
-
-let db: Db;
+let client: MongoClient | null = null;
+let db: Db | null = null;
 
 export async function connectToDatabase() {
+    if (db) return db;
+
+    const url = process.env.MONGO_URL;
+    if (!url) {
+        throw new Error('MONGO_URL environment variable is not defined.');
+    }
+
+    client = new MongoClient(url);
     await client.connect();
     console.log('Connected successfully to MongoDB');
     db = client.db(dbName);
