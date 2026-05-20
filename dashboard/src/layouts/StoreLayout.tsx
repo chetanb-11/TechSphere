@@ -61,102 +61,102 @@ export function StoreLayout() {
               TechSphere
             </span>
           </Link>
-          
+
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/catalog" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Catalog</Link>
             <Link to="/catalog?new=true" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">New Arrivals</Link>
             <Link to="/catalog?deals=true" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Deals</Link>
-            <Link to="/admin" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Admin</Link>
+            {user?.role == "admin" && <Link to="/admin" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Admin</Link>}
           </nav>
-          
+
           <div className="flex items-center gap-5">
-             <div className="relative hidden md:block" ref={searchRef}>
-               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-               <input 
-                 type="text" 
-                 placeholder="Search technology..." 
-                 value={searchQuery}
-                 onChange={(e) => setSearchQuery(e.target.value)}
-                 onKeyDown={handleKeyDown}
-                 onFocus={() => { if (searchQuery.trim().length > 0) setShowDropdown(true); }}
-                 className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none w-56 lg:w-72" 
-               />
-               
-               {showDropdown && (
-                 <div className="absolute top-full mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50">
-                   {isSearching ? (
-                     <div className="p-4 text-center text-sm text-slate-500">Searching...</div>
-                   ) : searchResults.length > 0 ? (
-                     <ul className="max-h-96 overflow-y-auto">
-                       {searchResults.slice(0, 4).map((product) => (
-                         <li key={product.id}>
-                           <Link 
-                             to={`/product/${product.id}`}
-                             onClick={() => {
-                               setShowDropdown(false);
-                               setSearchQuery("");
-                             }}
-                             className="flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
-                           >
-                             <img src={product.image} alt={product.name} className="w-10 h-10 object-cover rounded bg-slate-100" />
-                             <div className="flex-1 min-w-0">
-                               <p className="text-sm font-semibold text-slate-900 truncate">{product.name}</p>
-                               <p className="text-xs text-slate-500 font-medium">₹{product.price}</p>
-                             </div>
-                           </Link>
-                         </li>
-                       ))}
-                       {searchResults.length > 4 && (
-                         <li className="p-2 border-t border-slate-100">
-                           <Link
-                             to={`/catalog?q=${encodeURIComponent(searchQuery.trim())}`}
-                             onClick={() => setShowDropdown(false)}
-                             className="block w-full text-center text-xs font-semibold text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                           >
-                             View all {searchResults.length} results
-                           </Link>
-                         </li>
-                       )}
-                     </ul>
-                   ) : (
-                     <div className="p-4 text-center text-sm text-slate-500">No results found</div>
-                   )}
-                 </div>
-               )}
-             </div>
-             <Link to="/cart" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition-colors">
-               <ShoppingCart className="w-5 h-5" />
-               {cartCount > 0 && (
-                 <span className="absolute top-0 right-0 w-4 h-4 bg-blue-600 text-white text-[10px] flex items-center justify-center rounded-full font-bold shadow-sm">
-                   {cartCount}
-                 </span>
-               )}
-             </Link>
-             {isAuthenticated ? (
-               <div className="flex items-center gap-2">
-                 <span className="text-xs font-semibold text-slate-500 hidden sm:block max-w-[120px] truncate">{user?.email}</span>
-                 <button
-                   onClick={() => signout()}
-                   className="p-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors hidden sm:block"
-                   title="Sign out"
-                 >
-                   <LogOut className="w-5 h-5" />
-                 </button>
-               </div>
-             ) : (
-               <Link to="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition-colors">
-                 <User className="w-4 h-4" />
-                 Sign in
-               </Link>
-             )}
+            <div className="relative hidden md:block" ref={searchRef}>
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search technology..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => { if (searchQuery.trim().length > 0) setShowDropdown(true); }}
+                className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none w-56 lg:w-72"
+              />
+
+              {showDropdown && (
+                <div className="absolute top-full mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50">
+                  {isSearching ? (
+                    <div className="p-4 text-center text-sm text-slate-500">Searching...</div>
+                  ) : searchResults.length > 0 ? (
+                    <ul className="max-h-96 overflow-y-auto">
+                      {searchResults.slice(0, 4).map((product) => (
+                        <li key={product.id}>
+                          <Link
+                            to={`/product/${product.id}`}
+                            onClick={() => {
+                              setShowDropdown(false);
+                              setSearchQuery("");
+                            }}
+                            className="flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                          >
+                            <img src={product.image} alt={product.name} className="w-10 h-10 object-cover rounded bg-slate-100" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-slate-900 truncate">{product.name}</p>
+                              <p className="text-xs text-slate-500 font-medium">₹{product.price}</p>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                      {searchResults.length > 4 && (
+                        <li className="p-2 border-t border-slate-100">
+                          <Link
+                            to={`/catalog?q=${encodeURIComponent(searchQuery.trim())}`}
+                            onClick={() => setShowDropdown(false)}
+                            className="block w-full text-center text-xs font-semibold text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                          >
+                            View all {searchResults.length} results
+                          </Link>
+                        </li>
+                      )}
+                    </ul>
+                  ) : (
+                    <div className="p-4 text-center text-sm text-slate-500">No results found</div>
+                  )}
+                </div>
+              )}
+            </div>
+            <Link to="/cart" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-blue-600 text-white text-[10px] flex items-center justify-center rounded-full font-bold shadow-sm">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500 hidden sm:block max-w-[120px] truncate">{user?.email}</span>
+                <button
+                  onClick={() => signout()}
+                  className="p-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors hidden sm:block"
+                  title="Sign out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition-colors">
+                <User className="w-4 h-4" />
+                Sign in
+              </Link>
+            )}
           </div>
         </div>
       </header>
-      
+
       <main className="flex-1">
         <Outlet />
       </main>
-      
+
       <footer className="bg-slate-50 border-t border-slate-200 mt-24 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -190,7 +190,7 @@ export function StoreLayout() {
                 <li><a href="#" className="hover:text-blue-600 transition-colors">About Us</a></li>
                 <li><a href="#" className="hover:text-blue-600 transition-colors">Careers</a></li>
                 <li><a href="#" className="hover:text-blue-600 transition-colors">Support Center</a></li>
-                <li><Link to="/admin" className="hover:text-blue-600 transition-colors">Admin Console</Link></li>
+                <li>{user?.role === "admin" && (<Link to="/admin" className="hover:text-blue-600 transition-colors">Admin Console</Link>)};</li>
               </ul>
             </div>
           </div>

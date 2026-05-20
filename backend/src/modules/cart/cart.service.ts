@@ -37,7 +37,9 @@ export class CartService {
 
         return await db.collection('cart').aggregate([
             {
-                $match: { userId: userObjId },
+                $match: { userId: userObjId }
+            },
+            {
                 // lookup in products collection as productDetails
                 $lookup: {
                     from: 'products',

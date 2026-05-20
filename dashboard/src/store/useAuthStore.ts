@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ error: data.message || "Invalid email or password", isLoading: false });
         return false;
       }
-      const user: AuthUser = { email };
+      const user: AuthUser = { email, userId: data.userId, role: data.role };
       localStorage.setItem("techsphere_user", JSON.stringify(user));
       set({ user, isAuthenticated: true, isLoading: false });
       return true;
