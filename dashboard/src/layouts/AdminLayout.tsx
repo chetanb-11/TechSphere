@@ -12,16 +12,19 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans">
+    <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans">
+      
       {/* Sidebar */}
-      <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hidden md:block">
+      <aside className="w-64 border-r border-slate-100 bg-white hidden md:block">
         <div className="h-full flex flex-col">
-          <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white">
-                <Package className="w-3 h-3" />
+          <div className="h-20 flex items-center px-6 border-b border-slate-100">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold group-hover:bg-blue-700 transition-colors">
+                <Package className="w-5 h-5" />
               </div>
-              <span className="font-bold tracking-tight">VoltGadgets Admin</span>
+              <span className="font-bold text-lg tracking-tight text-slate-900">
+                TechSphere <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full ml-1">Admin</span>
+              </span>
             </Link>
           </div>
           
@@ -34,10 +37,10 @@ export function AdminLayout() {
                 end={item.href === "/admin"}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-200",
                     isActive
-                      ? "bg-blue-50 dark:bg-slate-800 text-blue-700 dark:text-blue-400"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      ? "bg-blue-50 text-blue-600 shadow-sm"
+                      : "text-slate-600 hover:text-blue-600 hover:bg-slate-50"
                   )
                 }
               >
@@ -47,8 +50,8 @@ export function AdminLayout() {
             ))}
           </nav>
           
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-             <button className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors">
+          <div className="p-4 border-t border-slate-100">
+             <button className="flex items-center gap-3 px-4 py-2.5 w-full text-left rounded-full text-sm font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
                <LogOut className="h-4 w-4" />
                Sign Out
              </button>
@@ -58,11 +61,16 @@ export function AdminLayout() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 md:hidden">
-          <span className="font-bold text-lg">VoltGadgets Admin</span>
+        <header className="h-20 flex items-center px-6 border-b border-slate-100 bg-white md:hidden">
+          <Link to="/" className="flex items-center gap-2 mr-auto">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+              <Package className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-lg text-slate-900">TechSphere Admin</span>
+          </Link>
         </header>
         
-        <div className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900 p-4 md:p-6 lg:p-8">
+        <div className="flex-1 overflow-auto bg-slate-50 p-6 md:p-8 lg:p-10">
           <div className="mx-auto max-w-6xl">
             <Outlet />
           </div>

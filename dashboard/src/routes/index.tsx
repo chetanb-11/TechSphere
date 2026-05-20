@@ -8,12 +8,25 @@ import { Home } from "../pages/Home";
 import { Catalog } from "../pages/Catalog";
 import { Cart } from "../pages/Cart";
 import { ProductDetail } from "../pages/ProductDetail";
+import { Checkout } from "../pages/Checkout";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { Login } from "../pages/Login";
+import { Signup } from "../pages/Signup";
 
 import { Customers } from "../pages/Customers";
 import { Orders } from "../pages/Orders";
 
 const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <Login />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+    errorElement: <ErrorBoundary />,
+  },
   {
     path: "/",
     element: <StoreLayout />,
@@ -23,6 +36,7 @@ const router = createBrowserRouter([
       { path: "catalog", element: <Catalog /> },
       { path: "product/:id", element: <ProductDetail /> },
       { path: "cart", element: <Cart /> },
+      { path: "checkout", element: <Checkout /> },
     ],
   },
   {
@@ -42,3 +56,4 @@ const router = createBrowserRouter([
 export function AppRouter() {
   return <RouterProvider router={router} />;
 }
+

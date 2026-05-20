@@ -55,9 +55,9 @@ export const apiService = {
       clickedWeek: item.clickedWeek || 0,
     }));
   },
-  getCartItems: async (): Promise<CartItem[]> => {
+  getCartItems: async (userId: string): Promise<CartItem[]> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
-    const response = await fetch(`${baseUrl}/cart`);
+    const response = await fetch(`${baseUrl}/cart?userId=${userId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -68,19 +68,27 @@ export const apiService = {
       quantity: item.quantity,
     }));
   },
-  addToCart: async (productId: string): Promise<void> => {
+  addToCart: async (productId: string, userId: string): Promise<void> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
     const response = await fetch(`${baseUrl}/cart/${productId}`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId })
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   },
-  removeFromCart: async (productId: string): Promise<void> => {
+  removeFromCart: async (productId: string, userId: string): Promise<void> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
     const response = await fetch(`${baseUrl}/cart/removecartitem/${productId}`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId })
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

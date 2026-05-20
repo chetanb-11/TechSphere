@@ -4,6 +4,8 @@ import cors from 'cors';
 import productsRoutes from './modules/products/products.routes';
 import cartRoutes from './modules/cart/cart.routes';
 import { connectToDatabase } from './config/db';
+import paymentsRoutes from './modules/payments/payments.routes';
+import authRoutes from './modules/auth/auth.routes';
 
 const app: Express = express();
 
@@ -30,6 +32,8 @@ app.use(async (req, res, next) => {
 // Routes
 app.use('/api/products', productsRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/payments', paymentsRoutes);
+app.use('/api/auth', authRoutes)
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {

@@ -4,8 +4,9 @@ import { CartItem } from "./cart.model";
 import { Product } from "../products/products.model";
 
 export class CartService {
-    static async addToCart(id: string) {
+    static async addToCart(id: string, userId: string) {
         const productId = new ObjectId(id);
+        const userObjId = new ObjectId(userId);
         const db = getDb();
 
         const product = await db.collection('products').findOne({ _id: productId });
@@ -13,15 +14,16 @@ export class CartService {
             throw new Error('Product not found');
         }
 
-        const existingItem = await db.collection<CartItem>('cart').findOne({ productId });
+        const existingItem = await db.collection<CartItem>('cart').findOne({ productId, userId: userObjId });
         if (existingItem) {
             await db.collection<CartItem>('cart').updateOne(
-                { productId },
+                { productId, userId: userObjId },
                 { $inc: { quantity: 1 } }
             );
         } else {
             await db.collection<CartItem>('cart').insertOne({
                 productId: productId,
+                userId: userObjId,
                 quantity: 1,
                 price: product.price,
                 addedAt: new Date(),
@@ -29,10 +31,13 @@ export class CartService {
         }
     }
 
-    static async allCartItems() {
+    static async allCartItems(userId: string) {
         const db = getDb();
+        const userObjId = new ObjectId(userId);
+
         return await db.collection('cart').aggregate([
             {
+                $match: { userId: userObjId },
                 // lookup in products collection as productDetails
                 $lookup: {
                     from: 'products',
@@ -64,15 +69,16 @@ export class CartService {
         ]).toArray();
     }
 
-    static async removeCartItem(id: string) {
+    static async removeCartItem(id: string, userId: string) {
         const cartItemId = new ObjectId(id)
+        const userObjId = new ObjectId(userId);
         const db = getDb();
-        const cartItem = await db.collection<CartItem>('cart').findOne({_id: cartItemId});
+        const cartItem = await db.collection<CartItem>('cart').findOne({ _id: cartItemId, userId: userObjId });
 
-        if(!cartItem){
+        if (!cartItem) {
             throw new Error('Cart Item not found');
         }
-        
-        return await db.collection<CartItem>('cart').deleteOne({_id: cartItemId})
+
+        return await db.collection<CartItem>('cart').deleteOne({ _id: cartItemId })
     }
 }

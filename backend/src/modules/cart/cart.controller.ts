@@ -6,7 +6,8 @@ import { CartItem } from './cart.model';
 export const addToCart = async (req: Request, res: Response) => {
     try {
         const id = req.params.id as string;
-        await CartService.addToCart(id);
+        const { userId } = req.body;
+        await CartService.addToCart(id, userId);
         res.status(201).json({ message: "Product added to cart" });
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error });
@@ -15,7 +16,8 @@ export const addToCart = async (req: Request, res: Response) => {
 
 export const cartItems = async (req: Request, res: Response) => {
     try {
-        const allCartItems = await CartService.allCartItems();
+        const userId = req.query.userId as string;
+        const allCartItems = await CartService.allCartItems(userId);
         res.status(200).json(allCartItems);
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error });
@@ -25,9 +27,10 @@ export const cartItems = async (req: Request, res: Response) => {
 export const removeCartItem = async (req: Request, res: Response) => {
     try {
         const cartItemId = req.params.id as string;
-        await CartService.removeCartItem(cartItemId);
+        const { userId } = req.body;
+        await CartService.removeCartItem(cartItemId, userId);
         res.status(201).json({ message: "Product removed from cart" });
-        } catch (error) {
+    } catch (error) {
         res.status(500).json({ message: "Internal server error", error });
-        }
+    }
 }

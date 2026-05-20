@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
 import { ShoppingCart } from "lucide-react";
 
@@ -14,6 +15,7 @@ export function Catalog() {
   const error = useAppStore(state => state.error);
   const searchError = useAppStore(state => state.searchError);
   const addToCart = useAppStore(state => state.addToCart);
+  const { user, isAuthenticated } = useAuthStore();
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -169,7 +171,13 @@ export function Catalog() {
                     <span className="font-bold text-lg">₹{product.price}</span>
                     <Button
                       size="sm"
-                      onClick={() => addToCart(product)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          navigate("/login");
+                        } else if (user?.userId) {
+                          addToCart(product, user.userId);
+                        }
+                      }}
                       disabled={product.stock === 0}
                       className="rounded-full shadow-none"
                     >

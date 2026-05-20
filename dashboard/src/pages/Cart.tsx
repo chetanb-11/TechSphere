@@ -1,15 +1,31 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
 import { Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 
 export function Cart() {
   const { cartItems, updateQuantity, removeFromCart, fetchCartItems } = useAppStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    fetchCartItems();
-  }, [fetchCartItems]);
+    if (user?.userId) {
+      fetchCartItems(user.userId);
+    }
+  }, [fetchCartItems, user]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center pb-64">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">Please sign in to view your cart</h1>
+        <p className="text-slate-500 mb-8">You need to be signed in to see and manage your personal cart items.</p>
+        <Link to="/login">
+          <Button size="lg" className="rounded-full px-8">Sign In</Button>
+        </Link>
+      </div>
+    );
+  }
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const shipping = subtotal > 0 ? 15 : 0;
@@ -63,7 +79,7 @@ export function Cart() {
                           </button>
                         </div>
                         <button 
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => user?.userId && removeFromCart(item.id, user.userId)}
                           className="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" /> Remove
@@ -96,9 +112,11 @@ export function Cart() {
                <span className="font-bold text-lg">Total</span>
                <span className="font-bold text-2xl">₹{total.toFixed(2)}</span>
              </div>
-             <Button size="lg" className="w-full rounded-full gap-2">
-                Proceed to Checkout <ArrowRight className="w-4 h-4" />
-             </Button>
+             <Link to="/checkout" className="block w-full">
+               <Button size="lg" className="w-full rounded-full gap-2">
+                  Proceed to Checkout <ArrowRight className="w-4 h-4" />
+               </Button>
+             </Link>
              <p className="text-xs text-center text-slate-500 mt-4">Secure checkout powered by TechSphere</p>
           </div>
         </aside>

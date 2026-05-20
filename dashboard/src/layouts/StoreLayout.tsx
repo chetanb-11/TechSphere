@@ -1,16 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, User, Search, Package } from "lucide-react";
+import { ShoppingCart, User, Search, Package, LogOut } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 export function StoreLayout() {
   const cartItems = useAppStore(state => state.cartItems) || [];
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const { searchResults, isSearching, searchProducts } = useAppStore();
+  const { isAuthenticated, user, signout } = useAuthStore();
+  const { searchResults, isSearching, searchProducts, fetchCartItems } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.userId) {
+      fetchCartItems(user.userId);
+    }
+  }, [user, fetchCartItems]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,7 +66,7 @@ export function StoreLayout() {
             <Link to="/catalog" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Catalog</Link>
             <Link to="/catalog?new=true" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">New Arrivals</Link>
             <Link to="/catalog?deals=true" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Deals</Link>
-            <Link to="/admin" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Support</Link>
+            <Link to="/admin" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Admin</Link>
           </nav>
           
           <div className="flex items-center gap-5">
@@ -124,9 +132,23 @@ export function StoreLayout() {
                  </span>
                )}
              </Link>
-             <Link to="/admin" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full transition-colors hidden sm:block">
-               <User className="w-5 h-5" />
-             </Link>
+             {isAuthenticated ? (
+               <div className="flex items-center gap-2">
+                 <span className="text-xs font-semibold text-slate-500 hidden sm:block max-w-[120px] truncate">{user?.email}</span>
+                 <button
+                   onClick={() => signout()}
+                   className="p-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors hidden sm:block"
+                   title="Sign out"
+                 >
+                   <LogOut className="w-5 h-5" />
+                 </button>
+               </div>
+             ) : (
+               <Link to="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition-colors">
+                 <User className="w-4 h-4" />
+                 Sign in
+               </Link>
+             )}
           </div>
         </div>
       </header>

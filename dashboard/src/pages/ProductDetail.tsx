@@ -1,5 +1,6 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
 import { ShoppingCart, Check, Shield, Truck, RotateCcw } from "lucide-react";
 
@@ -7,6 +8,8 @@ export function ProductDetail() {
   const { id } = useParams();
   const product = useAppStore(state => state.products.find(p => p.id === id));
   const addToCart = useAppStore(state => state.addToCart);
+  const { user, isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
 
   if (!product) return <div className="p-12 text-center text-slate-500">Product not found.</div>;
 
@@ -52,15 +55,21 @@ export function ProductDetail() {
              </div>
 
              <div className="flex gap-4 mt-auto">
-               <Button 
-                  size="lg" 
-                  className="flex-1 rounded-full text-base h-14" 
-                  onClick={() => addToCart(product)}
-                  disabled={product.stock === 0}
-               >
-                 <ShoppingCart className="w-5 h-5 mr-2" />
-                 Add to Cart
-               </Button>
+                <Button 
+                   size="lg" 
+                   className="flex-1 rounded-full text-base h-14" 
+                   onClick={() => {
+                     if (!isAuthenticated) {
+                       navigate("/login");
+                     } else if (user?.userId) {
+                       addToCart(product, user.userId);
+                     }
+                   }}
+                   disabled={product.stock === 0}
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Add to Cart
+                </Button>
              </div>
           </div>
        </div>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { apiService } from "../services/api";
+import { apiService, User } from "../services/api";
 
 export interface Product {
   id: string;
@@ -15,6 +15,7 @@ export interface Product {
 }
 
 export interface CartItem extends Product {
+  userId: string;
   quantity: number;
 }
 
@@ -24,13 +25,13 @@ interface AppState {
   isLoading: boolean;
   error: string | null;
   fetchProducts: () => Promise<void>;
-  fetchCartItems: () => Promise<void>;
+  fetchCartItems: (userId: string) => Promise<void>;
   searchResults: Product[];
   isSearching: boolean;
   searchError: string | null;
   searchProducts: (query: string) => Promise<void>;
-  addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
+  addToCart: (product: Product, userId: string, quantity?: number) => void;
+  removeFromCart: (productId: string, userId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
 }
 
@@ -52,15 +53,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  addToCart: async (product, quantity = 1) => {
+  addToCart: async (product, userId, quantity = 1) => {
     try {
-      await apiService.addToCart(product.id);
+      await apiService.addToCart(product.id, userId);
       set((state) => {
         const existing = state.cartItems.find(item => item.id === product.id);
         if (existing) {
           return { cartItems: state.cartItems.map(item => item.id === product.id ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) } : item) };
         }
-        return { cartItems: [...state.cartItems, { ...product, quantity: Math.min(product.stock, quantity) }] };
+        return { cartItems: [...state.cartItems, { ...product, userId, quantity: Math.min(product.stock, quantity) }] };
       });
     } catch (err) {
       console.error("Failed to add to cart:", err);
@@ -95,18 +96,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ searchResults: localResults, isSearching: false });
     }
   },
-  fetchCartItems: async () => {
+  fetchCartItems: async (userId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const cartItems = await apiService.getCartItems();
+      const cartItems = await apiService.getCartItems(userId);
       set({ cartItems, isLoading: false });
-    } catch (err) {
+    } catch (err: any) {
       set({ error: err.message || "Failed to fetch cart items", isLoading: false });
     }
   },
-  removeFromCart: async (productId) => {
+  removeFromCart: async (productId, userId) => {
     try {
-      await apiService.removeFromCart(productId);
+      await apiService.removeFromCart(productId, userId);
       set((state) => ({
         cartItems: state.cartItems.filter(item => item.id !== productId)
       }));

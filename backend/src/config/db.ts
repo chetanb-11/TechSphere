@@ -1,6 +1,6 @@
 import { MongoClient, Db } from 'mongodb';
 
-const dbName = 'eCom';
+const dbName = 'ecom';
 let client: MongoClient | null = null;
 let db: Db | null = null;
 
