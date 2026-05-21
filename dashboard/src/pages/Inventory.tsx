@@ -1,10 +1,18 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Plus, Package, AlertTriangle, TrendingUp } from "lucide-react";
 
 export function Inventory() {
+  const navigate = useNavigate();
   const products = useAppStore(state => state.products);
+  const fetchProducts = useAppStore(state => state.fetchProducts);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
   
   const totalStock = products.reduce((acc, p) => acc + p.stock, 0);
   const outOfStock = products.filter(p => p.stock === 0).length;
@@ -18,7 +26,7 @@ export function Inventory() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Inventory Management</h1>
           <p className="text-slate-500 text-sm mt-1">Manage products, stock levels, and pricing.</p>
         </div>
-        <Button className="shrink-0 gap-2">
+        <Button onClick={() => navigate("/admin/inventory/add")} className="shrink-0 gap-2">
           <Plus className="w-4 h-4" /> Add Product
         </Button>
       </div>

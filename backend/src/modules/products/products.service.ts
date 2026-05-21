@@ -45,4 +45,25 @@ export class ProductsService {
                 }
             });
     }
+
+    static async createProduct(title: string, description: string, price: number, stock: number, image: string, brand: string, category: string) {
+        const db = getDb();
+        const newProduct: Product = {
+            title: title || "",
+            description: description || "",
+            price: Number(price) || 0,
+            stock: Number(stock) || 0,
+            image: image || "",
+            brand: brand || "",
+            category: category || "",
+            clickedToday: 0,
+            clickedWeek: 0,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }
+        const result = await db.collection<Product>('products').insertOne(newProduct);
+
+        return { ...newProduct, _id: result.insertedId };
+
+    }
 }

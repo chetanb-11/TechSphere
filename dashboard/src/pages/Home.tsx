@@ -6,7 +6,8 @@ import { Button } from "../components/ui/Button";
 export function Home() {
   const products = useAppStore(state => state.products);
   const fetchProducts = useAppStore(state => state.fetchProducts);
-  const featured = products[0]; // Laptops
+  const isLoading = useAppStore(state => state.isLoading);
+  const featured = products[0];
   const trendingToday = [...products].sort((a, b) => b.clickedToday - a.clickedToday).slice(0, 4);
   const trendingWeek = [...products].sort((a, b) => b.clickedWeek - a.clickedWeek).slice(0, 4);
 
@@ -14,6 +15,49 @@ export function Home() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  if (isLoading || (!featured && products.length === 0 && !isLoading === false)) {
+    return (
+      <div className="pb-24">
+        {/* Hero Skeleton */}
+        <section className="bg-slate-950 text-white py-24 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 space-y-6 animate-pulse">
+              <div className="h-4 w-32 bg-slate-700 rounded-full" />
+              <div className="h-10 w-3/4 bg-slate-700 rounded-lg" />
+              <div className="h-10 w-1/2 bg-slate-700 rounded-lg" />
+              <div className="h-4 w-full bg-slate-800 rounded-full" />
+              <div className="h-4 w-2/3 bg-slate-800 rounded-full" />
+              <div className="flex gap-4 pt-4">
+                <div className="h-12 w-36 bg-slate-700 rounded-full" />
+                <div className="h-12 w-36 bg-slate-800 rounded-full" />
+              </div>
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="w-72 h-72 bg-slate-800 rounded-2xl animate-pulse" />
+            </div>
+          </div>
+        </section>
+
+        {/* Trending Skeleton */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="h-8 w-48 bg-slate-200 rounded-lg mb-8 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-100 overflow-hidden animate-pulse">
+                <div className="aspect-square bg-slate-100" />
+                <div className="p-5 space-y-3">
+                  <div className="h-3 w-20 bg-slate-100 rounded-full" />
+                  <div className="h-5 w-3/4 bg-slate-100 rounded-lg" />
+                  <div className="h-6 w-16 bg-slate-100 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   if (!featured) {
     return (

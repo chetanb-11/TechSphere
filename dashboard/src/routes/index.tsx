@@ -15,6 +15,7 @@ import { Signup } from "../pages/Signup";
 
 import { Customers } from "../pages/Customers";
 import { Orders } from "../pages/Orders";
+import { AddProduct } from "../pages/AddProduct";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: "inventory", element: <Inventory /> },
+      { path: "inventory/add", element: <AddProduct /> },
       { path: "orders", element: <Orders /> },
       { path: "customers", element: <Customers /> },
       { path: "settings", element: <Settings /> },

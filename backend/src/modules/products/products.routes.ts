@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { getProductByCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick } from './products.controller';
+import { createProduct, getProductByCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick } from './products.controller';
+import { checkAdmin, requireSignin } from '../../middleware/auth.middleware';
 
 const router = Router();
 
 router.get('/', getProducts);
-
+router.post('/', requireSignin, checkAdmin, createProduct);
 // Static routes MUST come before dynamic routes like /:category
 router.get('/trending/today', getTodayTrendingProducts);
 router.get('/trending/week', getWeekTrendingProducts);

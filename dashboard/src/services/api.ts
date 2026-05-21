@@ -97,6 +97,36 @@ export const apiService = {
   getUsers: async (): Promise<User[]> => {
     return new Promise((resolve) => setTimeout(() => resolve(mockUsers), 500));
   },
+  createProduct: async (productData: Omit<Product, 'id' | 'clickedToday' | 'clickedWeek'>, user?: any): Promise<Product> => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    const response = await fetch(`${baseUrl}/products`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...productData,
+        title: productData.name,
+        role: user || "",
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const item = await response.json();
+    return {
+      id: item._id || item.id,
+      name: item.title || item.name,
+      price: item.price,
+      category: item.category,
+      image: item.image,
+      stock: item.stock,
+      description: item.description,
+      brand: item.brand,
+      clickedToday: 0,
+      clickedWeek: 0,
+    };
+  },
   getStats: async () => {
     return new Promise((resolve) => 
       setTimeout(() => 

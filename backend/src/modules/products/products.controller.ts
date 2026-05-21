@@ -60,10 +60,31 @@ export const getProductsById = async (req: Request, res: Response) => {
 
 export const incrementProductClick = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
         const product = await ProductsService.incrementProductClick(id as string);
         res.json(200)
-    } catch (error){
-        res.status(500).json({message: "Internal server error", error});
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error });
+    }
+}
+
+export const createProduct = async (req: Request, res: Response) => {
+    try {
+        const { title, description, price, stock, image, brand, category } = req.body;
+        if (!title || price === undefined || !image || !category) {
+            return res.status(400).json({ message: "Missing required product details" })
+        }
+        const newProduct = await ProductsService.createProduct(
+            title,
+            description,
+            price,
+            stock,
+            image,
+            brand,
+            category
+        )
+        res.status(201).json(newProduct);
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error });
     }
 }
