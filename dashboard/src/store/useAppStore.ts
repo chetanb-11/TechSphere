@@ -12,6 +12,7 @@ export interface Product {
   brand: string;
   clickedToday: number;
   clickedWeek: number;
+  new: boolean;
 }
 
 export interface CartItem extends Product {

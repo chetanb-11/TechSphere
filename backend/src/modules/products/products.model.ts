@@ -13,4 +13,5 @@ export interface Product {
     clickedWeek: number,
     createdAt?: Date,
     updatedAt?: Date,
+    new: boolean,
 }

@@ -32,6 +32,7 @@ export const apiService = {
       brand: item.brand,
       clickedToday: item.clickedToday || 0,
       clickedWeek: item.clickedWeek || 0,
+      new: item.new || false,
     }));
   },
 
@@ -53,6 +54,7 @@ export const apiService = {
       brand: item.brand,
       clickedToday: item.clickedToday || 0,
       clickedWeek: item.clickedWeek || 0,
+      new: item.new || false,
     }));
   },
   getCartItems: async (userId: string): Promise<CartItem[]> => {
@@ -97,7 +99,7 @@ export const apiService = {
   getUsers: async (): Promise<User[]> => {
     return new Promise((resolve) => setTimeout(() => resolve(mockUsers), 500));
   },
-  createProduct: async (productData: Omit<Product, 'id' | 'clickedToday' | 'clickedWeek'>, user?: any): Promise<Product> => {
+  createProduct: async (productData: Omit<Product, 'id' | 'clickedToday' | 'clickedWeek' | 'new'>, user?: any): Promise<Product> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
     const response = await fetch(`${baseUrl}/products`, {
       method: "POST",
@@ -108,6 +110,7 @@ export const apiService = {
         ...productData,
         title: productData.name,
         role: user || "",
+        new: true,
       }),
     });
     if (!response.ok) {
@@ -125,6 +128,7 @@ export const apiService = {
       brand: item.brand,
       clickedToday: 0,
       clickedWeek: 0,
+      new: item.new || false,
     };
   },
   getStats: async () => {

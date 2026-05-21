@@ -19,7 +19,7 @@ export function Home() {
   if (isLoading || (!featured && products.length === 0 && !isLoading === false)) {
     return (
       <div className="pb-24">
-        {/* Hero Skeleton */}
+        {/* Hero ka Skeleton */}
         <section className="bg-slate-950 text-white py-24 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 space-y-6 animate-pulse">
@@ -39,7 +39,7 @@ export function Home() {
           </div>
         </section>
 
-        {/* Trending Skeleton */}
+        {/* Trending ka Skeleton */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="h-8 w-48 bg-slate-200 rounded-lg mb-8 animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -69,7 +69,7 @@ export function Home() {
   }
   return (
     <div className="pb-24">
-      {/* Hero Section */}
+      {/* Hero ka Section */}
       <section className="bg-slate-950 text-white py-24 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img

@@ -38,9 +38,13 @@ export function Catalog() {
     ? Array.from(new Set(products.map(p => p.category)))
     : ["Laptops", "Mobile", "Audio", "Tablets", "Wearables", "Displays"];
 
-  const filtered = selectedCategory
-    ? displayProducts.filter(p => p.category === selectedCategory)
-    : displayProducts;
+  const isNewOnly = searchParams.get("new") === "true";
+
+  const filtered = displayProducts.filter(p => {
+    const matchesCategory = selectedCategory ? p.category === selectedCategory : true;
+    const matchesNew = isNewOnly ? p.new === true : true;
+    return matchesCategory && matchesNew;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -91,7 +95,11 @@ export function Catalog() {
         <main className="flex-1">
           <div className="mb-8 flex items-center justify-between">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              {query ? `Search Results for "${query}"` : (selectedCategory || "All Tech")}
+              {query 
+                ? `Search Results for "${query}"` 
+                : isNewOnly 
+                  ? `New Arrivals ${selectedCategory ? `in ${selectedCategory}` : ''}` 
+                  : (selectedCategory || "All Tech")}
             </h1>
             <div className="flex items-center gap-4">
               {query && (
