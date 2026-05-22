@@ -117,7 +117,7 @@ export function Cart() {
                   Proceed to Checkout <ArrowRight className="w-4 h-4" />
                </Button>
              </Link>
-             <p className="text-xs text-center text-slate-500 mt-4">Secure checkout powered by CartFordge</p>
+             <p className="text-xs text-center text-slate-500 mt-4">Secure checkout powered by TechSphere</p>
           </div>
         </aside>
       </div>

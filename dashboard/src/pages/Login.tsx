@@ -55,7 +55,7 @@ export function Login() {
               <Package className="w-5 h-5" />
             </div>
             <span className="font-bold text-xl tracking-tight text-white">
-              CartFodge
+              TechSphere
             </span>
           </Link>
 
@@ -94,7 +94,7 @@ export function Login() {
           </div>
 
           <p className="text-sm text-slate-500">
-            © 2026 CartFodge. All rights reserved.
+            © 2026 TechSphere. All rights reserved.
           </p>
         </div>
       </div>
