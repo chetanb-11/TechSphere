@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createProduct, getProductByCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick } from './products.controller';
+import { createProduct, getProductByCategory, getProducts, getProductsByBrand, getProductsById, getTodayTrendingProducts, getWeekTrendingProducts, incrementProductClick, searchProducts } from './products.controller';
 import { checkAdmin, requireSignin } from '../../middleware/auth.middleware';
 
 const router = Router();
@@ -13,5 +13,6 @@ router.get('/id/:id', getProductsById);
 router.patch('/id/:id/click', incrementProductClick);
 router.get('/brands/:brand', getProductsByBrand);
 router.get('/:category', getProductByCategory);
+router.get('/search/:query', searchProducts)
 
 export default router;

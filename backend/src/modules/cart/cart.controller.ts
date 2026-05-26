@@ -34,3 +34,14 @@ export const removeCartItem = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal server error", error });
     }
 }
+
+export const updateQuantity = async (req: Request, res: Response) => {
+    try {
+        const cartItemId = req.params.id as string;
+        const { userId, quantity } = req.body;
+        await CartService.updateQuantity(cartItemId, userId, quantity);
+        res.status(200).json({ message: "Cart item quantity updated" });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error });
+    }
+}

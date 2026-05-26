@@ -3,13 +3,22 @@ import { useAppStore } from "../store/useAppStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
 import { ShoppingCart, Check, Shield, Truck, RotateCcw } from "lucide-react";
+import { useState, useEffect } from 'react';
 
 export function ProductDetail() {
   const { id } = useParams();
-  const product = useAppStore(state => state.products.find(p => p.id === id));
+  const products = useAppStore(state => state.products);
+  const fetchProducts = useAppStore(state => state.fetchProducts);
+  const product = products.find(p => p.id === id);
   const addToCart = useAppStore(state => state.addToCart);
   const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (products.length === 0) {
+      fetchProducts();
+    }
+  }, [products.length, fetchProducts]);
 
   if (!product) return <div className="p-12 text-center text-slate-500">Product not found.</div>;
 

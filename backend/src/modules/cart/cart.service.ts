@@ -83,4 +83,20 @@ export class CartService {
 
         return await db.collection<CartItem>('cart').deleteOne({ _id: cartItemId })
     }
+
+    static async updateQuantity(id: string, userId: string, quantity: number) {
+        const cartItemId = new ObjectId(id);
+        const userObjId = new ObjectId(userId);
+        const db = getDb();
+        const cartItem = await db.collection<CartItem>('cart').findOne({ _id: cartItemId, userId: userObjId });
+
+        if (!cartItem) {
+            throw new Error('Cart Item not found');
+        }
+
+        return await db.collection<CartItem>('cart').updateOne(
+            { _id: cartItemId },
+            { $set: { quantity: Number(quantity) } }
+        );
+    }
 }

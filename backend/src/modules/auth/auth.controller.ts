@@ -24,7 +24,7 @@ export const signin = async (req: Request, res: Response) => {
                 role: user.role
             });
         } else {
-            res.status(404).json({message: "email and password don't match"});
+            res.status(401).json({message: "Invalid email or password"});
         }
     } catch (err: any) {
         res.status(500).json({ error: err.message });

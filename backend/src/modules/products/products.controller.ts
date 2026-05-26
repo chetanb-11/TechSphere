@@ -62,7 +62,7 @@ export const incrementProductClick = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const product = await ProductsService.incrementProductClick(id as string);
-        res.json(200)
+        res.sendStatus(200)
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error });
     }
@@ -87,4 +87,8 @@ export const createProduct = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error });
     }
+}
+
+export const searchProducts = async(req: Request, res: Response) => {
+    return res.sendStatus(404);
 }

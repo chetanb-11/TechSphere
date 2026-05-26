@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { apiService, User } from "../services/api";
+import { useAuthStore } from "./useAuthStore";
 
 export interface Product {
   id: string;
@@ -33,7 +34,7 @@ interface AppState {
   searchProducts: (query: string) => Promise<void>;
   addToCart: (product: Product, userId: string, quantity?: number) => void;
   removeFromCart: (productId: string, userId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -116,8 +117,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ error: err.message || "Failed to remove item from cart" });
     }
   },
-  updateQuantity: (productId, quantity) => set((state) => ({
-    cartItems: state.cartItems.map(item => item.id === productId ? { ...item, quantity } : item)
-  }))
+  updateQuantity: async (productId, quantity) => {
+    set((state) => ({
+      cartItems: state.cartItems.map(item => item.id === productId ? { ...item, quantity } : item)
+    }));
+    const userId = useAuthStore.getState().user?.userId;
+    if (userId) {
+      try {
+        await apiService.updateCartQuantity(productId, userId, quantity);
+      } catch (err: any) {
+        console.error("Failed to update cart quantity on server:", err);
+      }
+    }
+  }
 }));
 

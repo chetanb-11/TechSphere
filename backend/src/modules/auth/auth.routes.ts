@@ -20,6 +20,6 @@ router.post("/signup", signup);
 // Route to get all users (requires admin permission)
 router.get("/user", checkAdmin, getAllUser);
 // Route to get user by ID (requires sign-in)
-router.get("/user:_id", getUserByID);
+router.get("/user/:_id", getUserByID);
 
 export default router;

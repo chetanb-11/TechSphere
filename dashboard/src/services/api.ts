@@ -96,6 +96,19 @@ export const apiService = {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   },
+  updateCartQuantity: async (productId: string, userId: string, quantity: number): Promise<void> => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    const response = await fetch(`${baseUrl}/cart/${productId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, quantity })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  },
   getUsers: async (): Promise<User[]> => {
     return new Promise((resolve) => setTimeout(() => resolve(mockUsers), 500));
   },
@@ -118,7 +131,7 @@ export const apiService = {
     }
     const item = await response.json();
     return {
-      id: item._id || item.id,
+      id: item.productId,
       name: item.title || item.name,
       price: item.price,
       category: item.category,
