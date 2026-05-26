@@ -60,6 +60,7 @@ export class ProductsService {
             clickedWeek: 0,
             createdAt: new Date(),
             updatedAt: new Date(),
+            new: true,
         }
         const result = await db.collection<Product>('products').insertOne(newProduct);
 
