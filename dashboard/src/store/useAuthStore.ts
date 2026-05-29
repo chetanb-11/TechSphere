@@ -4,6 +4,7 @@ interface AuthUser {
   email: string;
   userId?: string;
   role?: string;
+  token?: string;
 }
 
 interface AuthState {
@@ -38,7 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ error: data.message || "Invalid email or password", isLoading: false });
         return false;
       }
-      const user: AuthUser = { email, userId: data.userId, role: data.role };
+      const user: AuthUser = { email, userId: data.userId, role: data.role, token: data.token };
       localStorage.setItem("techsphere_user", JSON.stringify(user));
       set({ user, isAuthenticated: true, isLoading: false });
       return true;
@@ -61,7 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ error: data.message || "Signup failed", isLoading: false });
         return false;
       }
-      const user: AuthUser = { email, userId: data.userId };
+      const user: AuthUser = { email, userId: data.userId, token: data.token };
       localStorage.setItem("techsphere_user", JSON.stringify(user));
       set({ user, isAuthenticated: true, isLoading: false });
       return true;

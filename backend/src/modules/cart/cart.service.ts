@@ -1,12 +1,12 @@
-import { ObjectId } from "mongodb";
 import { getDb } from "../../config/db";
 import { CartItem } from "./cart.model";
 import { Product } from "../products/products.model";
+import { toObjectId } from "../../utils/objectId";
 
 export class CartService {
     static async addToCart(id: string, userId: string) {
-        const productId = new ObjectId(id);
-        const userObjId = new ObjectId(userId);
+        const productId = toObjectId(id, 'product ID');
+        const userObjId = toObjectId(userId, 'user ID');
         const db = getDb();
 
         const product = await db.collection('products').findOne({ _id: productId });
@@ -33,7 +33,7 @@ export class CartService {
 
     static async allCartItems(userId: string) {
         const db = getDb();
-        const userObjId = new ObjectId(userId);
+        const userObjId = toObjectId(userId, 'user ID');
 
         return await db.collection('cart').aggregate([
             {
@@ -72,8 +72,8 @@ export class CartService {
     }
 
     static async removeCartItem(id: string, userId: string) {
-        const cartItemId = new ObjectId(id)
-        const userObjId = new ObjectId(userId);
+        const cartItemId = toObjectId(id, 'cart item ID');
+        const userObjId = toObjectId(userId, 'user ID');
         const db = getDb();
         const cartItem = await db.collection<CartItem>('cart').findOne({ _id: cartItemId, userId: userObjId });
 
@@ -83,10 +83,21 @@ export class CartService {
 
         return await db.collection<CartItem>('cart').deleteOne({ _id: cartItemId })
     }
+    static async emptyCart( userId: string) {
+        const userObjId = toObjectId(userId, 'user ID');
+        const db = getDb();
+        const cartItem = await db.collection<CartItem>('cart').findOne({ userId: userObjId });
+
+        if (!cartItem) {
+            throw new Error('Cart Item not found');
+        }
+
+        return await db.collection<CartItem>('cart').deleteMany({userId: userObjId});
+    }
 
     static async updateQuantity(id: string, userId: string, quantity: number) {
-        const cartItemId = new ObjectId(id);
-        const userObjId = new ObjectId(userId);
+        const cartItemId = toObjectId(id, 'cart item ID');
+        const userObjId = toObjectId(userId, 'user ID');
         const db = getDb();
         const cartItem = await db.collection<CartItem>('cart').findOne({ _id: cartItemId, userId: userObjId });
 

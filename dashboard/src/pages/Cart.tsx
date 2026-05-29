@@ -58,7 +58,7 @@ export function Cart() {
                      <div className="flex justify-between items-start mb-2">
                        <div>
                          <div className="text-xs font-semibold text-blue-600 mb-1">{item.brand}</div>
-                         <h3 className="font-bold text-slate-900 leading-snug"><Link to={`/product/${item.id}`} className="hover:text-blue-600">{item.name}</Link></h3>
+                         <h3 className="font-bold text-slate-900 leading-snug"><Link to={`/product/${item.productId}`} className="hover:text-blue-600">{item.name}</Link></h3>
                        </div>
                        <div className="font-bold text-lg">₹{item.price}</div>
                      </div>

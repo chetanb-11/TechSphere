@@ -13,6 +13,21 @@ const mockUsers: User[] = [
   { id: "3", name: "Charlie Davis", email: "charlie@example.com", role: "Viewer" },
 ];
 
+const getAuthHeaders = () => {
+  const userStr = localStorage.getItem("techsphere_user");
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user.token) {
+        return { 'Authorization': `Bearer ${user.token}` };
+      }
+    } catch (e) {
+      console.error("Failed to parse user from local storage", e);
+    }
+  }
+  return {};
+};
+
 export const apiService = {
   getProducts: async (): Promise<Product[]> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
@@ -38,7 +53,7 @@ export const apiService = {
 
   searchProducts: async (query: string): Promise<Product[]> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
-    const response = await fetch(`${baseUrl}/search/${query}`);
+    const response = await fetch(`${baseUrl}/products/search/${query}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -59,7 +74,9 @@ export const apiService = {
   },
   getCartItems: async (userId: string): Promise<CartItem[]> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
-    const response = await fetch(`${baseUrl}/cart?userId=${userId}`);
+    const response = await fetch(`${baseUrl}/cart?userId=${userId}`, {
+      headers: { ...getAuthHeaders() }
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -67,6 +84,7 @@ export const apiService = {
     return data.map((item: any) => ({
       ...item,
       id: item._id || item.id,
+      productId: item.productId || item._id || item.id,
       quantity: item.quantity,
     }));
   },
@@ -76,6 +94,7 @@ export const apiService = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders()
       },
       body: JSON.stringify({ userId })
     });
@@ -83,12 +102,13 @@ export const apiService = {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   },
-  removeFromCart: async (productId: string, userId: string): Promise<void> => {
+  removeFromCart: async (cartItemId: string, userId: string): Promise<void> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
-    const response = await fetch(`${baseUrl}/cart/removecartitem/${productId}`, {
+    const response = await fetch(`${baseUrl}/cart/removecartitem/${cartItemId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders()
       },
       body: JSON.stringify({ userId })
     });
@@ -96,12 +116,13 @@ export const apiService = {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   },
-  updateCartQuantity: async (productId: string, userId: string, quantity: number): Promise<void> => {
+  updateCartQuantity: async (cartItemId: string, userId: string, quantity: number): Promise<void> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
-    const response = await fetch(`${baseUrl}/cart/${productId}`, {
+    const response = await fetch(`${baseUrl}/cart/${cartItemId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders()
       },
       body: JSON.stringify({ userId, quantity })
     });
@@ -112,17 +133,18 @@ export const apiService = {
   getUsers: async (): Promise<User[]> => {
     return new Promise((resolve) => setTimeout(() => resolve(mockUsers), 500));
   },
-  createProduct: async (productData: Omit<Product, 'id' | 'clickedToday' | 'clickedWeek' | 'new'>, user?: any): Promise<Product> => {
+  createProduct: async (productData: Omit<Product, 'id' | 'clickedToday' | 'clickedWeek' | 'new'>, user?: { email?: string; role?: string }): Promise<Product> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
     const response = await fetch(`${baseUrl}/products`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders()
       },
       body: JSON.stringify({
         ...productData,
         title: productData.name,
-        role: user || "",
+        email: user?.email || "",
         new: true,
       }),
     });
@@ -131,7 +153,7 @@ export const apiService = {
     }
     const item = await response.json();
     return {
-      id: item.productId,
+      id: item._id || item.id,
       name: item.title || item.name,
       price: item.price,
       category: item.category,

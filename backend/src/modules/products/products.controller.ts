@@ -53,8 +53,8 @@ export const getProductsById = async (req: Request, res: Response) => {
         const { id } = req.params;
         const product = await ProductsService.getProductsById(id as string);
         res.status(200).json(product);
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 };
 
@@ -63,8 +63,8 @@ export const incrementProductClick = async (req: Request, res: Response) => {
         const { id } = req.params;
         const product = await ProductsService.incrementProductClick(id as string);
         res.sendStatus(200)
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }
 
@@ -84,8 +84,8 @@ export const createProduct = async (req: Request, res: Response) => {
             category
         )
         res.status(201).json(newProduct);
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }
 

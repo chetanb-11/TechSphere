@@ -9,8 +9,8 @@ export const addToCart = async (req: Request, res: Response) => {
         const { userId } = req.body;
         await CartService.addToCart(id, userId);
         res.status(201).json({ message: "Product added to cart" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }
 
@@ -19,8 +19,8 @@ export const cartItems = async (req: Request, res: Response) => {
         const userId = req.query.userId as string;
         const allCartItems = await CartService.allCartItems(userId);
         res.status(200).json(allCartItems);
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }
 
@@ -30,8 +30,8 @@ export const removeCartItem = async (req: Request, res: Response) => {
         const { userId } = req.body;
         await CartService.removeCartItem(cartItemId, userId);
         res.status(201).json({ message: "Product removed from cart" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }
 
@@ -41,7 +41,7 @@ export const updateQuantity = async (req: Request, res: Response) => {
         const { userId, quantity } = req.body;
         await CartService.updateQuantity(cartItemId, userId, quantity);
         res.status(200).json({ message: "Cart item quantity updated" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }

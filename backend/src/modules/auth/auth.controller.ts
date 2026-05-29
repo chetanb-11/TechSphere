@@ -1,31 +1,25 @@
 
 import { Request, Response } from "express";
-import { getDb } from "../../config/db";
 import { User } from "./auth.model";
-import bcrypt from "bcrypt";
+import { AuthService } from "./auth.service";
+import { getDb } from "../../config/db";
 
 export const signin = async (req: Request, res: Response) => {
     try {
-        const db = getDb();
         const { email, password } = req.body;
-        const user = await db.collection<User>('user').findOne({
-            email: email
-        });
+        const { user, isMatch, token } = await AuthService.signin(email, password);
 
-        if (!user) {
+        if (!user || !isMatch) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (isMatch) {
-            res.status(200).json({ 
-                message: "Login success placeholder",
-                userId: user._id,
-                email: user.email,
-                role: user.role
-            });
-        } else {
-            res.status(401).json({message: "Invalid email or password"});
-        }
+
+        res.status(200).json({
+            message: "Login success placeholder",
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+            token: token,
+        });
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
@@ -33,30 +27,44 @@ export const signin = async (req: Request, res: Response) => {
 
 export const signup = async (req: Request, res: Response) => {
     try {
-        const db = getDb();
         const { email, password, role } = req.body;
-
+        
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password are required" });
         }
-
-        const alreadyUser = await db.collection<User>('user').findOne({ email: email });
+        const { alreadyUser, result, token } = await AuthService.signup(email, password, role);
         if (alreadyUser) {
             return res.status(400).json({ message: "User already exists" });
         }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser: User = {
-            email,
-            password: hashedPassword,
-            role: role || "user"
-        };
-
-        const result = await db.collection<User>('user').insertOne(newUser);
-        res.status(201).json({ message: "User created successfully", userId: result.insertedId });
+        
+        res.status(201).json({ 
+            message: "User created successfully", 
+            userId: result.insertedId,
+            token: token,
+         });
     } catch (err: any) {
         res.status(500).json({ error: err.message });
+    }
+}
+
+export const getAllUser = async (req: Request, res: Response) => {
+    try {
+        const allUser = await AuthService.getAllUser();
+        res.status(200).json(allUser);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || "Internal server error" });
+    }
+}
+
+export const getUser = async (req: Request, res: Response) => {
+    try {
+        const { _id } = req.params;
+        const user = await AuthService.getUser(_id as string);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }

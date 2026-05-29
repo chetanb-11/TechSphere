@@ -17,6 +17,7 @@ export interface Product {
 }
 
 export interface CartItem extends Product {
+  productId: string;
   userId: string;
   quantity: number;
 }
@@ -33,8 +34,8 @@ interface AppState {
   searchError: string | null;
   searchProducts: (query: string) => Promise<void>;
   addToCart: (product: Product, userId: string, quantity?: number) => void;
-  removeFromCart: (productId: string, userId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  removeFromCart: (cartItemId: string, userId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -59,11 +60,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       await apiService.addToCart(product.id, userId);
       set((state) => {
-        const existing = state.cartItems.find(item => item.id === product.id);
+        const existing = state.cartItems.find(item => item.productId === product.id);
         if (existing) {
-          return { cartItems: state.cartItems.map(item => item.id === product.id ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) } : item) };
+          return { cartItems: state.cartItems.map(item => item.productId === product.id ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) } : item) };
         }
-        return { cartItems: [...state.cartItems, { ...product, userId, quantity: Math.min(product.stock, quantity) }] };
+        // Use a temporary id for the cart entry; real cart _id comes on next fetch
+        return { cartItems: [...state.cartItems, { ...product, id: `temp-${Date.now()}`, productId: product.id, userId, quantity: Math.min(product.stock, quantity) }] };
       });
     } catch (err) {
       console.error("Failed to add to cart:", err);
@@ -107,24 +109,24 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ error: err.message || "Failed to fetch cart items", isLoading: false });
     }
   },
-  removeFromCart: async (productId, userId) => {
+  removeFromCart: async (cartItemId, userId) => {
     try {
-      await apiService.removeFromCart(productId, userId);
+      await apiService.removeFromCart(cartItemId, userId);
       set((state) => ({
-        cartItems: state.cartItems.filter(item => item.id !== productId)
+        cartItems: state.cartItems.filter(item => item.id !== cartItemId)
       }));
     } catch (err: any) {
       set({ error: err.message || "Failed to remove item from cart" });
     }
   },
-  updateQuantity: async (productId, quantity) => {
+  updateQuantity: async (cartItemId, quantity) => {
     set((state) => ({
-      cartItems: state.cartItems.map(item => item.id === productId ? { ...item, quantity } : item)
+      cartItems: state.cartItems.map(item => item.id === cartItemId ? { ...item, quantity } : item)
     }));
     const userId = useAuthStore.getState().user?.userId;
     if (userId) {
       try {
-        await apiService.updateCartQuantity(productId, userId, quantity);
+        await apiService.updateCartQuantity(cartItemId, userId, quantity);
       } catch (err: any) {
         console.error("Failed to update cart quantity on server:", err);
       }

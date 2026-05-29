@@ -12,7 +12,7 @@ router.get('/trending/week', getWeekTrendingProducts);
 router.get('/id/:id', getProductsById);
 router.patch('/id/:id/click', incrementProductClick);
 router.get('/brands/:brand', getProductsByBrand);
+router.get('/search/:query', searchProducts);
 router.get('/:category', getProductByCategory);
-router.get('/search/:query', searchProducts)
 
 export default router;

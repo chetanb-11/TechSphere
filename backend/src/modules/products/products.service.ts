@@ -1,6 +1,6 @@
 import { Product } from './products.model';
 import { getDb } from '../../config/db';
-import { ObjectId } from 'mongodb';
+import { toObjectId } from '../../utils/objectId';
 
 export class ProductsService {
     static async getAllProducts(): Promise<Product[]> {
@@ -30,12 +30,12 @@ export class ProductsService {
 
     static async getProductsById(id: string): Promise<Product | null> {
         const db = getDb();
-        return await db.collection<Product>('products').findOne({ _id: new ObjectId(id) });
+        return await db.collection<Product>('products').findOne({ _id: toObjectId(id, 'product ID') });
     }
 
     static async incrementProductClick(id: string) {
         const db = getDb();
-        const productid = new ObjectId(id);
+        const productid = toObjectId(id, 'product ID');
         const result = await db.collection('products').updateOne(
             { _id: productid },
             {

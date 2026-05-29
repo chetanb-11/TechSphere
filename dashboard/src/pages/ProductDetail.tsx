@@ -9,6 +9,7 @@ export function ProductDetail() {
   const { id } = useParams();
   const products = useAppStore(state => state.products);
   const fetchProducts = useAppStore(state => state.fetchProducts);
+  const isLoading = useAppStore(state => state.isLoading);
   const product = products.find(p => p.id === id);
   const addToCart = useAppStore(state => state.addToCart);
   const { user, isAuthenticated } = useAuthStore();
@@ -19,6 +20,24 @@ export function ProductDetail() {
       fetchProducts();
     }
   }, [products.length, fetchProducts]);
+
+  if (isLoading || (products.length === 0 && !product)) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
+        <div className="h-4 w-48 bg-slate-200 rounded mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24">
+          <div className="aspect-square rounded-3xl bg-slate-100" />
+          <div className="space-y-4 py-4">
+            <div className="h-3 w-24 bg-slate-200 rounded" />
+            <div className="h-8 w-3/4 bg-slate-200 rounded" />
+            <div className="h-4 w-full bg-slate-100 rounded" />
+            <div className="h-4 w-5/6 bg-slate-100 rounded" />
+            <div className="h-10 w-32 bg-slate-200 rounded-full mt-8" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) return <div className="p-12 text-center text-slate-500">Product not found.</div>;
 
