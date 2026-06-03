@@ -19,15 +19,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Database Lazy Connection for Serverless
-app.use(async (req, res, next) => {
-    try {
-        await connectToDatabase();
-        next();
-    } catch (err: any) {
-        console.error("Database connection failed:", err);
-        res.status(500).json({ error: "Database connection failed", details: err.message });
-    }
-});
+// app.use(async (req, res, next) => {
+//     try {
+//         await connectToDatabase();
+//         next();
+//     } catch (err: any) {
+//         console.error("Database connection failed:", err);
+//         res.status(500).json({ error: "Database connection failed", details: err.message });
+//     }
+// });
 
 // Routes
 app.use('/api/products', productsRoutes);

@@ -29,9 +29,9 @@ export const signup = async (req: Request, res: Response) => {
     try {
         const { email, password, role } = req.body;
         
-        if (!email || !password) {
-            return res.status(400).json({ message: "Email and password are required" });
-        }
+        // if (!email || !password) {
+        //     return res.status(400).json({ message: "Email and password are required" });
+        // }
         const { alreadyUser, result, token } = await AuthService.signup(email, password, role);
         if (alreadyUser) {
             return res.status(400).json({ message: "User already exists" });

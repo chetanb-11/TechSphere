@@ -71,9 +71,9 @@ export const incrementProductClick = async (req: Request, res: Response) => {
 export const createProduct = async (req: Request, res: Response) => {
     try {
         const { title, description, price, stock, image, brand, category } = req.body;
-        if (!title || price === undefined || !image || !category) {
-            return res.status(400).json({ message: "Missing required product details" })
-        }
+        // if (!title || price === undefined || !image || !category) {
+        //     return res.status(400).json({ message: "Missing required product details" })
+        // }
         const newProduct = await ProductsService.createProduct(
             title,
             description,
