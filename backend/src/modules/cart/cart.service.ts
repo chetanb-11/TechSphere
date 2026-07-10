@@ -86,12 +86,6 @@ export class CartService {
     static async emptyCart( userId: string) {
         const userObjId = toObjectId(userId, 'user ID');
         const db = getDb();
-        const cartItem = await db.collection<CartItem>('cart').findOne({ userId: userObjId });
-
-        if (!cartItem) {
-            throw new Error('Cart Item not found');
-        }
-
         return await db.collection<CartItem>('cart').deleteMany({userId: userObjId});
     }
 

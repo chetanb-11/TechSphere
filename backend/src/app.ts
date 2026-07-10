@@ -6,6 +6,8 @@ import cartRoutes from './modules/cart/cart.routes';
 import { connectToDatabase } from './config/db';
 import paymentsRoutes from './modules/payments/payments.routes';
 import authRoutes from './modules/auth/auth.routes';
+import { requireSignin } from './middleware/auth.middleware';
+import orderRouter from './modules/orders/orders.routes';
 
 const app: Express = express();
 
@@ -31,9 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/products', productsRoutes);
-app.use('/api/cart', cartRoutes);
+app.use('/api/cart', requireSignin, cartRoutes);
 app.use('/api/payments', paymentsRoutes);
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', authRoutes);
+app.use('/api/orders', orderRouter);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {

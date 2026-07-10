@@ -132,6 +132,11 @@ export function StoreLayout() {
                 </span>
               )}
             </Link>
+            {isAuthenticated && (
+              <Link to="/orders" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition-colors" title="My Orders">
+                <Package className="w-5 h-5" />
+              </Link>
+            )}
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-slate-500 hidden sm:block max-w-[120px] truncate">{user?.email}</span>

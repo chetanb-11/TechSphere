@@ -10,21 +10,42 @@ export const validate = (schema: ZodObject) => async (req: Request, res: Respons
         });
 
         req.body = parsed.body;
-        req.query = parsed.query as any;
-        req.params = parsed.params as any;
+        
+        Object.defineProperty(req, 'query', {
+            value: parsed.query,
+            writable: true,
+            configurable: true,
+            enumerable: true
+        });
+
+        Object.defineProperty(req, 'params', {
+            value: parsed.params,
+            writable: true,
+            configurable: true,
+            enumerable: true
+        });
 
 
         return next();
-    } catch (error) {
-        if (error instanceof ZodError) {
+    } catch (error: any) {
+        console.error("Validation error occurred:", error);
+
+        const isZodError = error instanceof ZodError || 
+            (error && typeof error === 'object' && error.name === 'ZodError') ||
+            (error && typeof error === 'object' && Array.isArray(error.issues));
+
+        if (isZodError) {
             return res.status(400).json({
                 message: "Validation failed",
-                error: error.issues.map(e => ({
+                error: error.issues.map((e: any) => ({
                     field: e.path.join('.'),
                     message: e.message,
                 }))
-            })
+            });
         }
-        return res.status(500).json({ message: "Internal server error during validation" });
+        return res.status(500).json({ 
+            message: "Internal server error during validation",
+            details: error instanceof Error ? error.message : String(error)
+        });
     }
-}
+};

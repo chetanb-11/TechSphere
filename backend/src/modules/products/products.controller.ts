@@ -90,5 +90,10 @@ export const createProduct = async (req: Request, res: Response) => {
 }
 
 export const searchProducts = async(req: Request, res: Response) => {
+
+    // const {query} = req.params;
+    // const searchedProducts = await ProductsService.searchProduct(query);
+
+
     return res.sendStatus(404);
 }

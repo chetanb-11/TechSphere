@@ -1,16 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Users, UserPlus, Mail, ShoppingBag, Star, MoreHorizontal } from "lucide-react";
-
-const allCustomers = [
-  { id: 1, name: "Ankit Sharma", email: "ankit@email.com", avatar: "AS", orders: 24, spent: "₹1,42,300", joined: "Jan 2025", status: "Active" },
-  { id: 2, name: "Priya Patel", email: "priya@email.com", avatar: "PP", orders: 18, spent: "₹98,550", joined: "Mar 2025", status: "Active" },
-  { id: 3, name: "Rahul Verma", email: "rahul@email.com", avatar: "RV", orders: 12, spent: "₹45,200", joined: "Jun 2025", status: "Active" },
-  { id: 4, name: "Sneha Gupta", email: "sneha@email.com", avatar: "SG", orders: 31, spent: "₹2,15,690", joined: "Nov 2024", status: "VIP" },
-  { id: 5, name: "Vikash Kumar", email: "vikash@email.com", avatar: "VK", orders: 3, spent: "₹16,870", joined: "Apr 2026", status: "New" },
-  { id: 6, name: "Neha Singh", email: "neha@email.com", avatar: "NS", orders: 8, spent: "₹62,100", joined: "Sep 2025", status: "Active" },
-  { id: 7, name: "Amit Joshi", email: "amit@email.com", avatar: "AJ", orders: 15, spent: "₹89,450", joined: "Feb 2025", status: "Active" },
-  { id: 8, name: "Kavita Rao", email: "kavita@email.com", avatar: "KR", orders: 2, spent: "₹8,320", joined: "May 2026", status: "New" },
-];
+import { apiService } from "../services/api";
 
 const avatarColors = [
   "bg-blue-100 text-blue-700",
@@ -31,17 +21,57 @@ const statusStyles: Record<string, string> = {
 
 export function Customers() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredCustomers = allCustomers.filter(c =>
+  useEffect(() => {
+    const fetchCustomersAndOrders = async () => {
+      try {
+        const [users, ordersList] = await Promise.all([
+          apiService.getUsers(),
+          apiService.getOrders()
+        ]);
+        
+        const mapped = users.map((u: any) => {
+          const userOrders = ordersList.filter((order: any) => order.userId === u.id);
+          const totalSpent = userOrders.reduce((acc: number, order: any) => acc + (order.total || 0), 0);
+          
+          return {
+            id: u.id,
+            name: u.name || u.email.split('@')[0],
+            email: u.email,
+            avatar: (u.name || u.email.split('@')[0]).substring(0, 2).toUpperCase(),
+            orders: userOrders.length,
+            spent: `₹${Number(totalSpent).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`,
+            joined: "Jul 2026",
+            status: u.role === "admin" ? "VIP" : "Active"
+          };
+        });
+        setCustomers(mapped);
+      } catch (err: any) {
+        setError(err.message || "Failed to load customers");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCustomersAndOrders();
+  }, []);
+
+  const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalSpentAll = customers.reduce((acc, c) => acc + Number(c.spent.replace(/[^0-9.-]+/g,"")), 0);
+  const totalOrdersAll = customers.reduce((acc, c) => acc + c.orders, 0);
+  const avgOrderValue = totalOrdersAll > 0 ? totalSpentAll / totalOrdersAll : 0;
+
   const customerStats = [
-    { label: "Total Customers", value: "8,491", icon: Users, color: "bg-blue-50 text-blue-600" },
-    { label: "New This Month", value: "142", icon: UserPlus, color: "bg-emerald-50 text-emerald-600" },
-    { label: "Avg. Order Value", value: "₹4,850", icon: ShoppingBag, color: "bg-violet-50 text-violet-600" },
-    { label: "VIP Members", value: "326", icon: Star, color: "bg-amber-50 text-amber-600" },
+    { label: "Total Customers", value: String(customers.length), icon: Users, color: "bg-blue-50 text-blue-600" },
+    { label: "VIP Members", value: String(customers.filter(c => c.status === "VIP").length), icon: Star, color: "bg-amber-50 text-amber-600" },
+    { label: "Avg. Order Value", value: `₹${Number(avgOrderValue).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, icon: ShoppingBag, color: "bg-violet-50 text-violet-600" },
+    { label: "VIP Ratio", value: `${customers.length > 0 ? Math.round((customers.filter(c => c.status === "VIP").length / customers.length) * 100) : 0}%`, icon: UserPlus, color: "bg-emerald-50 text-emerald-600" },
   ];
 
   return (

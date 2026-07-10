@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
 import { Button } from "./ui/Button";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { useAppStore } from "../store/useAppStore";
+import { apiService } from "../services/api";
 
 export function CheckoutForm({ total }: { total: number }) {
   const stripe = useStripe();
@@ -9,6 +12,8 @@ export function CheckoutForm({ total }: { total: number }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { user } = useAuthStore();
+  const { cartItems } = useAppStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,13 +30,43 @@ export function CheckoutForm({ total }: { total: number }) {
       confirmParams: {
         return_url: `${window.location.origin}/`,
       },
-      redirect: 'if_required', 
+      redirect: 'if_required',
     });
 
     if (error) {
       setMessage(error.message ?? "An unexpected error occurred.");
       setIsProcessing(false);
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+      if (user?.userId) {
+        try {
+          // 1. Prepare Order Schema payload
+          const orderData = {
+            customerEmail: user.email,
+            customerName: user.email.split('@')[0],
+            items: cartItems.map(item => ({
+              productId: item.productId,
+              title: item.name,
+              price: item.price,
+              quantity: item.quantity
+            })),
+            subtotal: cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0),
+            shipping: 15,
+            tax: cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0) * 0.08,
+            total: total,
+            paymentStatus: "paid" as const,
+            stripePaymentIntentId: paymentIntent.id
+          };
+
+          // 2. Save order to MongoDB
+          await apiService.createOrder(user.userId, orderData);
+
+          // 3. Clear the local cart state since checkout completed
+          useAppStore.setState({ cartItems: [] });
+        } catch (err) {
+          console.error("Failed to save completed order to backend database:", err);
+        }
+      }
+
       setIsSuccess(true);
       setIsProcessing(false);
     } else {
@@ -61,13 +96,13 @@ export function CheckoutForm({ total }: { total: number }) {
     <form onSubmit={handleSubmit} className="w-full">
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-6">
         <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-           <span className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">2</span>
-           Payment Details
+          <span className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">2</span>
+          Payment Details
         </h3>
-        <PaymentElement 
+        <PaymentElement
           options={{
             layout: "tabs",
-          }} 
+          }}
         />
       </div>
 
@@ -78,10 +113,10 @@ export function CheckoutForm({ total }: { total: number }) {
         </div>
       )}
 
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         disabled={isProcessing || !stripe || !elements}
-        size="lg" 
+        size="lg"
         className="w-full rounded-full text-lg shadow-md hover:shadow-lg transition-all"
       >
         {isProcessing ? "Processing..." : `Pay ₹${total.toFixed(2)}`}

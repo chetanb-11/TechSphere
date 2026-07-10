@@ -5,7 +5,7 @@ import { createCartSchema } from "./cart.schema";
 
 const router = Router();
 
-router.get('/', validate(createCartSchema), cartItems);
+router.get('/', cartItems);
 router.post('/:id', addToCart);
 router.post('/removecartitem/:id', removeCartItem);
 router.patch('/:id', updateQuantity);

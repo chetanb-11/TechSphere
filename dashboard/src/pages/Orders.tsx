@@ -1,46 +1,85 @@
-import { useState, React } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Filter, ChevronDown, Eye, MoreHorizontal, Truck, Clock, CheckCircle2, XCircle, Package } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { apiService } from "../services/api";
 
-const allOrders = [
-  { id: "TS-9001", customer: "Ankit Sharma", email: "ankit@email.com", date: "May 19, 2026", items: 3, total: "₹12,340", status: "Delivered", payment: "Credit Card" },
-  { id: "TS-9000", customer: "Priya Patel", email: "priya@email.com", date: "May 19, 2026", items: 1, total: "₹8,550", status: "Processing", payment: "UPI" },
-  { id: "TS-8999", customer: "Rahul Verma", email: "rahul@email.com", date: "May 18, 2026", items: 2, total: "₹3,200", status: "Shipped", payment: "Debit Card" },
-  { id: "TS-8998", customer: "Sneha Gupta", email: "sneha@email.com", date: "May 18, 2026", items: 5, total: "₹15,690", status: "Delivered", payment: "Credit Card" },
-  { id: "TS-8997", customer: "Vikash Kumar", email: "vikash@email.com", date: "May 17, 2026", items: 1, total: "₹6,870", status: "Cancelled", payment: "UPI" },
-  { id: "TS-8996", customer: "Neha Singh", email: "neha@email.com", date: "May 17, 2026", items: 4, total: "₹22,100", status: "Shipped", payment: "Net Banking" },
-  { id: "TS-8995", customer: "Amit Joshi", email: "amit@email.com", date: "May 16, 2026", items: 2, total: "₹9,450", status: "Processing", payment: "Credit Card" },
-  { id: "TS-8994", customer: "Kavita Rao", email: "kavita@email.com", date: "May 16, 2026", items: 1, total: "₹4,320", status: "Delivered", payment: "UPI" },
-];
+
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
   "Delivered": { icon: CheckCircle2, color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
   "Processing": { icon: Clock, color: "text-blue-700", bg: "bg-blue-50 border-blue-100" },
+  "Pending": { icon: Clock, color: "text-slate-700", bg: "bg-slate-50 border-slate-100" },
   "Shipped": { icon: Truck, color: "text-amber-700", bg: "bg-amber-50 border-amber-100" },
   "Cancelled": { icon: XCircle, color: "text-red-700", bg: "bg-red-50 border-red-100" },
 };
 
 export function Orders() {
+
+  const { user } = useAuthStore();
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!user?.userId) return;
+      try {
+        const data = user.role === "admin"
+          ? await apiService.getOrders()
+          : await apiService.getOrdersById(user.userId);
+        const mappedOrders = data.map((order: any) => {
+          let status = "Processing";
+          if (order.fulfillmentStatus) {
+            status = order.fulfillmentStatus.charAt(0).toUpperCase() + order.fulfillmentStatus.slice(1);
+          } else if (order.paymentStatus === "paid") {
+            status = "Processing";
+          }
+
+          return {
+            id: order._id ? `TS-${order._id.substring(18).toUpperCase()}` : `TS-${Math.floor(Math.random() * 10000)}`,
+            customer: order.customerName || "Customer",
+            email: order.customerEmail || "No email",
+            date: order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric"
+            }) : "N/A",
+            items: order.items?.length || 0,
+            total: `₹${Number(order.total || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+            status: status,
+            payment: order.stripePaymentIntentId ? "Stripe" : "Credit Card"
+          };
+        });
+        setOrders(mappedOrders);
+      } catch (err: any) {
+        setError(err.message || "Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [user]);
+
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filters = ["All", "Processing", "Shipped", "Delivered", "Cancelled"];
 
-  const filteredOrders = allOrders.filter(order => {
+  const filteredOrders = orders.filter(order => {
     const matchesFilter = filter === "All" || order.status === filter;
     const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.customer.toLowerCase().includes(searchQuery.toLowerCase());
+      order.customer.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   const orderStats = [
-    { label: "Total Orders", value: "1,284", icon: Package, color: "bg-blue-50 text-blue-600" },
-    { label: "Processing", value: "42", icon: Clock, color: "bg-amber-50 text-amber-600" },
-    { label: "Shipped", value: "18", icon: Truck, color: "bg-violet-50 text-violet-600" },
-    { label: "Delivered", value: "1,198", icon: CheckCircle2, color: "bg-emerald-50 text-emerald-600" },
+    { label: "Total Orders", value: String(orders.length), icon: Package, color: "bg-blue-50 text-blue-600" },
+    { label: "Processing", value: String(orders.filter(order => order.status === "Processing").length), icon: Clock, color: "bg-amber-50 text-amber-600" },
+    { label: "Shipped", value: String(orders.filter(order => order.status === "Shipped").length), icon: Truck, color: "bg-violet-50 text-violet-600" },
+    { label: "Delivered", value: String(orders.filter(order => order.status === "Delivered").length), icon: CheckCircle2, color: "bg-emerald-50 text-emerald-600" },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="p-10 space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Orders</h1>
@@ -71,11 +110,10 @@ export function Orders() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  filter === f
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${filter === f
                     ? "bg-blue-600 text-white shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                  }`}
               >
                 {f}
               </button>
@@ -99,27 +137,33 @@ export function Orders() {
             <thead>
               <tr className="text-left border-b border-slate-100 bg-slate-50/50">
                 <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider">Order</th>
-                <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider">Customer</th>
+                {user?.role === "admin" && (
+                  <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider">Customer</th>
+                )}
                 <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider hidden md:table-cell">Date</th>
                 <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider hidden lg:table-cell">Payment</th>
                 <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider">Amount</th>
                 <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider">Status</th>
-                <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider text-right">Action</th>
+                {user?.role === "admin" && (
+                  <th className="py-3.5 px-6 font-semibold text-slate-500 text-xs uppercase tracking-wider text-right">Action</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {filteredOrders.map((order) => {
-                const cfg = statusConfig[order.status];
+                const cfg = statusConfig[order.status] || statusConfig["Processing"];
                 const StatusIcon = cfg.icon;
                 return (
                   <tr key={order.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
                     <td className="py-4 px-6 font-bold text-slate-900">{order.id}</td>
-                    <td className="py-4 px-6">
-                      <div>
-                        <p className="font-semibold text-slate-900">{order.customer}</p>
-                        <p className="text-xs text-slate-400">{order.email}</p>
-                      </div>
-                    </td>
+                    {user?.role === "admin" && (
+                      <td className="py-4 px-6">
+                        <div>
+                          <p className="font-semibold text-slate-900">{order.customer}</p>
+                          <p className="text-xs text-slate-400">{order.email}</p>
+                        </div>
+                      </td>
+                    )}
                     <td className="py-4 px-6 text-slate-500 hidden md:table-cell">{order.date}</td>
                     <td className="py-4 px-6 text-slate-500 hidden lg:table-cell">{order.payment}</td>
                     <td className="py-4 px-6 font-semibold text-slate-900">{order.total}</td>
@@ -128,17 +172,19 @@ export function Orders() {
                         <StatusIcon className="w-3 h-3" />{order.status}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </td>
+                    {user?.role === "admin" && (
+                      <td className="py-4 px-6 text-right">
+                        <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
               {filteredOrders.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
+                  <td colSpan={user?.role === "admin" ? 7 : 5} className="py-12 text-center text-slate-400 font-medium">
                     No orders match your filters.
                   </td>
                 </tr>

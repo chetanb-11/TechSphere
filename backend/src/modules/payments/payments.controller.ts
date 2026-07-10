@@ -21,9 +21,9 @@ export const createPaymentintent = async (req: Request, res:Response) => {
 
         const authReq = req as any;
         const userId = authReq.user?.id || req.body.userId || items?.[0]?.userId;
-        if (userId) {
-            await CartService.emptyCart(userId);
-        }
+        // if (userId) {
+        //     await CartService.emptyCart(userId);
+        // }
 
         res.json({
             clientSecret: paymentIntent.client_secret,

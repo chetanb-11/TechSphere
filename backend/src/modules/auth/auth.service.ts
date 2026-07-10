@@ -37,7 +37,9 @@ export class AuthService {
     static async signup(email: string, password: string, role?: "admin" | "user" | "guest") {
         const db = getDb();
         const alreadyUser = await db.collection<User>('user').findOne({ email: email });
-        
+        if(alreadyUser){
+            return {alreadyUser, result: null, token: null};
+        }
         
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);

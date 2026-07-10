@@ -1,24 +1,39 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "../store/useAppStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
 import { Activity, DollarSign, Users, AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight, Package, ShoppingCart, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+import { apiService } from "../services/api";
 
 export function Dashboard() {
   const products = useAppStore(state => state.products);
   const fetchProducts = useAppStore(state => state.fetchProducts);
+  const [orders, setOrders] = useState<any[]>([]);
   const lowStockProducts = products.filter(p => p.stock > 0 && p.stock < 15);
   const outOfStockProducts = products.filter(p => p.stock === 0);
   const trendingProducts = [...products].sort((a, b) => b.clickedToday - a.clickedToday).slice(0, 5);
 
   useEffect(() => {
     fetchProducts();
+    const fetchOrders = async () => {
+      try {
+        const data = await apiService.getOrders();
+        setOrders(data);
+      } catch (err) {
+        console.error("Failed to fetch dashboard orders:", err);
+      }
+    };
+    fetchOrders();
   }, [fetchProducts]);
+
+  const totalRevenue = orders.reduce((acc, order) => acc + (order.total || 0), 0);
+  const today = new Date().toDateString();
+  const ordersToday = orders.filter(order => order.createdAt && new Date(order.createdAt).toDateString() === today).length;
 
   const stats = [
     {
       title: "Total Revenue",
-      value: "₹4,52,319",
+      value: "₹" + Number(totalRevenue).toLocaleString("en-IN", { maximumFractionDigits: 0 }),
       change: "+20.1%",
       trend: "up",
       icon: DollarSign,
@@ -26,7 +41,7 @@ export function Dashboard() {
     },
     {
       title: "Orders Today",
-      value: "2,350",
+      value: String(ordersToday),
       change: "+15%",
       trend: "up",
       icon: ShoppingCart,
@@ -57,13 +72,31 @@ export function Dashboard() {
     red: { bg: "bg-red-50", iconBg: "bg-red-100 text-red-600", text: "text-red-600" },
   };
 
-  const recentOrders = [
-    { id: "TS-8941", customer: "Ankit Sharma", amount: "₹12,340", status: "Delivered", statusColor: "bg-green-100 text-green-700" },
-    { id: "TS-8940", customer: "Priya Patel", amount: "₹8,550", status: "Processing", statusColor: "bg-blue-100 text-blue-700" },
-    { id: "TS-8939", customer: "Rahul Verma", amount: "₹3,200", status: "Shipped", statusColor: "bg-amber-100 text-amber-700" },
-    { id: "TS-8938", customer: "Sneha Gupta", amount: "₹15,690", status: "Delivered", statusColor: "bg-green-100 text-green-700" },
-    { id: "TS-8937", customer: "Vikash Kumar", amount: "₹6,870", status: "Processing", statusColor: "bg-blue-100 text-blue-700" },
-  ];
+  const recentOrders = orders.slice(0, 5).map(order => {
+    let status = "Processing";
+    let statusColor = "bg-blue-100 text-blue-700";
+    if (order.fulfillmentStatus) {
+      status = order.fulfillmentStatus.charAt(0).toUpperCase() + order.fulfillmentStatus.slice(1);
+    } else if (order.paymentStatus === "paid") {
+      status = "Processing";
+    }
+    
+    if (status === "Delivered") {
+      statusColor = "bg-emerald-100 text-emerald-700";
+    } else if (status === "Shipped") {
+      statusColor = "bg-amber-100 text-amber-700";
+    } else if (status === "Cancelled") {
+      statusColor = "bg-red-100 text-red-700";
+    }
+    
+    return {
+      id: order._id ? `TS-${order._id.substring(18).toUpperCase()}` : `TS-${Math.floor(Math.random() * 10000)}`,
+      customer: order.customerName || "Customer",
+      amount: `₹${Number(order.total || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`,
+      status: status,
+      statusColor: statusColor
+    };
+  });
 
   return (
     <div className="space-y-8">

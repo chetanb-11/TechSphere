@@ -72,6 +72,45 @@ export const apiService = {
       new: item.new || false,
     }));
   },
+
+  getOrdersById: async (userId: string): Promise<any[]> => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    const response = await fetch(`${baseUrl}/orders/${userId}`, {
+      headers: {...getAuthHeaders()}
+    });
+    if(!response.ok){
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
+
+  getOrders: async (): Promise<any[]> => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    const response = await fetch(`${baseUrl}/orders`, {
+      headers: {...getAuthHeaders()}
+    });
+    if(!response.ok){
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
+
+  createOrder: async (userId: string, orderData: any): Promise<any> =>{
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    const response = await fetch(`${baseUrl}/orders/${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(orderData)
+    });
+    if(!response.ok){
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
+
   getCartItems: async (userId: string): Promise<CartItem[]> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
     const response = await fetch(`${baseUrl}/cart?userId=${userId}`, {
@@ -131,7 +170,20 @@ export const apiService = {
     }
   },
   getUsers: async (): Promise<User[]> => {
-    return new Promise((resolve) => setTimeout(() => resolve(mockUsers), 500));
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+    const response = await fetch(`${baseUrl}/auth/user`, {
+      headers: { ...getAuthHeaders() }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.map((u: any) => ({
+      id: u._id || u.id,
+      name: u.email.split('@')[0],
+      email: u.email,
+      role: u.role || "user"
+    }));
   },
   createProduct: async (productData: Omit<Product, 'id' | 'clickedToday' | 'clickedWeek' | 'new'>, user?: { email?: string; role?: string }): Promise<Product> => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";

@@ -67,4 +67,10 @@ export class ProductsService {
         return { ...newProduct, _id: result.insertedId };
 
     }
+
+    // static async searchProduct(query: string){
+    //     const db = getDb();
+
+
+    // }
 }

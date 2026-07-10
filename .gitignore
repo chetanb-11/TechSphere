@@ -29,3 +29,6 @@ logs/
 .next/
 out/
 coverage/
+
+# Generated Code Dumps
+repomix-output.*
