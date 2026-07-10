@@ -23,7 +23,7 @@ export const getOrders = async (req: Request, res: Response) => {
 
 export const createOrder = async (req: Request, res: Response) => {
     try {
-        const userId = req.params.id;
+        const userId = req.params.id as string;
         const order = req.body;
         const result = await OrderService.createOrder(userId, order);
         await CartService.emptyCart(userId);
