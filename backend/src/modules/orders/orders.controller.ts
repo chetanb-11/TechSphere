@@ -4,7 +4,7 @@ import { CartService } from "../cart/cart.service";
 
 export const getOrdersById = async (req: Request, res: Response) => {
     try {
-        const userId = req.params.id;
+        const userId = req.params.id as string;
         const orders = await OrderService.getAllOrdersById(userId);
         return res.status(200).json(orders);
     } catch (error: any) {
